@@ -1,0 +1,73 @@
+# Build APKs — Helmand University Digital Library (free, GitHub Actions)
+#
+# Builds the release APK for the student app and the admin app.
+# Runs on every push to main, or manually from the Actions tab.
+# The APKs appear under "Artifacts" when the run finishes.
+#
+# Secrets (optional at first): SUPABASE_URL and SUPABASE_ANON_KEY.
+# If they are not set, the apps still build and work — the student app
+# uses its bundled catalogue offline, and the admin app shows its
+# setup screen. Add the secrets in:
+#   Repository Settings > Secrets and variables > Actions > New secret
+# Never put real keys in the code.
+
+name: Build APKs
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.app }} APK
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - app: student_app
+            artifact: student-app-apk
+          - app: admin_app
+            artifact: admin-app-apk
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Flutter (stable)
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Set up Gradle 8.7
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: "8.7"
+
+      - name: Generate Gradle wrapper
+        run: gradle wrapper --gradle-version 8.7
+        working-directory: ${{ matrix.app }}/android
+
+      - name: Get packages
+        run: flutter pub get
+        working-directory: ${{ matrix.app }}
+
+      - name: Build release APK
+        run: >
+          flutter build apk --release
+          --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
+          --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
+        working-directory: ${{ matrix.app }}
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.app }}/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error

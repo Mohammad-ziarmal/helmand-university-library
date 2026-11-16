@@ -1,0 +1,32 @@
+name: student_app
+description: "Helmand University Digital Library - Student App"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+  flutter: ">=3.22.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  provider: ^6.1.2
+  shared_preferences: ^2.2.3
+  url_launcher: ^6.3.0
+  # Supabase is OPTIONAL for the student app. The app works fully offline
+  # from the bundled catalogue (lib/data/catalogue.dart). Supabase is only
+  # used later, when the backend is connected. Keys are never in this code:
+  # pass them with --dart-define SUPABASE_URL / SUPABASE_ANON_KEY.
+  supabase_flutter: ^2.5.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

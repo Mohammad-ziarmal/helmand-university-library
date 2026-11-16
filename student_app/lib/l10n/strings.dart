@@ -1,0 +1,159 @@
+// Simple Pashto / English strings for the student app.
+// Pashto is the default language; English is the second language.
+// No generated l10n files are needed, so the project stays small and
+// buildable without extra tooling.
+
+import 'package:flutter/widgets.dart';
+import 'package:provider/provider.dart';
+
+import '../services/store.dart';
+
+/// Translate [key] using the current language from [AppState].
+String tr(BuildContext context, String key) {
+  final ps = context.watch<AppState>().isPashto;
+  return Strings.t(key, ps);
+}
+
+extension AppStateContext on BuildContext {
+  /// Current language flag, watched so the widget rebuilds on change.
+  bool watchAppStateIsPashto() => watch<AppState>().isPashto;
+}
+
+class Strings {
+  static String t(String key, bool isPashto) {
+    final map = isPashto ? ps : en;
+    return map[key] ?? ps[key] ?? key;
+  }
+
+  static const Map<String, String> ps = {
+    'appTitle': 'د هلمند پوهنتون کتابتون',
+    'appSubtitle': 'ډیجیټل کتابتون — هلمند پوهنتون',
+    'universityLibrary': 'د پوهنتون کتابتون',
+    'universityLibraryDesc': 'پوهنځي، څانګې، سمسترونه او درسي کتابونه',
+    'readingLibrary': 'د مطالعې کتابتون',
+    'readingLibraryDesc': 'پښتو ادبي او عمومي کتابونه',
+    'developerProfile': 'د اپلیکیشن جوړونکی',
+    'developerProfileDesc': 'محمد زیارمل — هلمند پوهنتون',
+    'searchHint': 'کتاب، مضمون یا لیکوال وپلټئ…',
+    'search': 'پلټنه',
+    'favorites': 'خوښې کتابونه',
+    'settings': 'تنظیمات',
+    'faculties': 'پوهنځي',
+    'departments': 'څانګې',
+    'semesters': 'سمسترونه',
+    'semester': 'سمستر',
+    'subjects': 'مضمونونه',
+    'books': 'کتابونه',
+    'book': 'کتاب',
+    'read': 'ولولئ',
+    'download': 'ډاونلوډ',
+    'author': 'لیکوال',
+    'credits': 'کریدیتونه',
+    'code': 'کوډ',
+    'newBooks': 'نوي کتابونه',
+    'allBooks': 'ټول کتابونه',
+    'language': 'ژبه',
+    'theme': 'بڼه',
+    'light': 'روښانه',
+    'dark': 'تیاره',
+    'system': 'د سیسټم له مخې',
+    'about': 'په اړه',
+    'aboutText':
+        'دا اپ د هلمند پوهنتون د محصلینو لپاره جوړ شوی دی، تر څو درسي کتابونه په اسانۍ پیدا، ولولي او ډاونلوډ کړي. ټول کتابونه د لوړو زده کړو وزارت د درسي کتابونو ملي پروګرام (eCampus) له لارې وړیا دي.',
+    'noFavorites': 'تر اوسه مو هېڅ کتاب نه دی خوښ کړی.',
+    'noResults': 'هېڅ پایله ونه موندل شوه.',
+    'openError': 'لینک پرانیستل نه شو.',
+    'call': 'زنګ',
+    'email': 'ایمیل',
+    'serviceDeptNote':
+        'دا خدمتي څانګه ده؛ خپله درجه نه لري، خو په نورو څانګو کې اسلامي ثقافت تدریسوي.',
+    'generalSubjects': 'عمومي مضمونونه',
+    'categories': 'کټګورۍ',
+    'comingSoon': 'ژر راځي',
+    'home': 'کور',
+    'totalBooks': 'ټول کتابونه',
+    'totalDepartments': 'ټولې څانګې',
+    'totalFaculties': 'ټول پوهنځي',
+    'unknownAuthor': 'نامعلوم',
+    'version': 'نسخه 1.0.0',
+    'noBooksNote':
+        'د دې څانګې کتابونه لا په eCampus کې نشته؛ کتابونه به له پوهنتون څخه راوړل شي.',
+    'pcbNote':
+        'دا کتاب د eCampus د PCB پاڼې له لارې موندل کېږي؛ لینک تاسو هماغې پاڼې ته بیایي.',
+    'freeBooksNote':
+        'ټول کتابونه وړیا دي — د لوړو زده کړو وزارت، د درسي کتابونو ملي پروګرام.',
+    'developerRole': 'د پروژې جوړونکی او اصلي مدیر',
+    'developerMessage':
+        'زما موخه د هلمند پوهنتون د محصلینو لپاره د علمي سرچینو او درسي کتابونو د لاسرسي یوه اسانه، عصري او ګټوره لاره رامنځته کول دي. زه غواړم د ټکنالوژۍ په مرسته د خپل پوهنتون او ټولنې لپاره داسې ډیجیټلي خدمات وړاندې کړم چې د علم، پوهې او پرمختګ په برخه کې دوامداره ګټه ولري.',
+    'subject': 'مضمون',
+    'tapToOpen': 'د پرانیستلو لپاره یې ټک کړئ',
+    'savedOfflineNote':
+        'دا اپ له انټرنېټ پرته هم کار کوي؛ کتابونه د لوستلو لپاره انټرنېټ غواړي.',
+  };
+
+  static const Map<String, String> en = {
+    'appTitle': 'Helmand University Library',
+    'appSubtitle': 'Digital Library — Helmand University',
+    'universityLibrary': 'University Library',
+    'universityLibraryDesc': 'Faculties, departments, semesters and textbooks',
+    'readingLibrary': 'Reading Library',
+    'readingLibraryDesc': 'Pashto literary and general books',
+    'developerProfile': 'App Developer',
+    'developerProfileDesc': 'Mohammad Ziarmal — Helmand University',
+    'searchHint': 'Search a book, subject or author…',
+    'search': 'Search',
+    'favorites': 'Favorites',
+    'settings': 'Settings',
+    'faculties': 'Faculties',
+    'departments': 'Departments',
+    'semesters': 'Semesters',
+    'semester': 'Semester',
+    'subjects': 'Subjects',
+    'books': 'Books',
+    'book': 'Book',
+    'read': 'Read',
+    'download': 'Download',
+    'author': 'Author',
+    'credits': 'Credits',
+    'code': 'Code',
+    'newBooks': 'New Books',
+    'allBooks': 'All Books',
+    'language': 'Language',
+    'theme': 'Appearance',
+    'light': 'Light',
+    'dark': 'Dark',
+    'system': 'System',
+    'about': 'About',
+    'aboutText':
+        'This app is made for Helmand University students, so they can easily find, read and download their textbooks. All books are free through the Ministry of Higher Education National Textbooks Program (eCampus).',
+    'noFavorites': 'You have not favourited any book yet.',
+    'noResults': 'No results found.',
+    'openError': 'Could not open the link.',
+    'call': 'Call',
+    'email': 'Email',
+    'serviceDeptNote':
+        'This is a service department; it has no degree of its own, but teaches Islamic Culture in the other departments.',
+    'generalSubjects': 'General Subjects',
+    'categories': 'Categories',
+    'comingSoon': 'Coming soon',
+    'home': 'Home',
+    'totalBooks': 'Total books',
+    'totalDepartments': 'Total departments',
+    'totalFaculties': 'Total faculties',
+    'unknownAuthor': 'Unknown',
+    'version': 'Version 1.0.0',
+    'noBooksNote':
+        'No books for this department on eCampus yet; books will come from the university.',
+    'pcbNote':
+        'This book is found through the eCampus PCB textbooks page; the link opens that page.',
+    'freeBooksNote':
+        'All books are free — Ministry of Higher Education, National Textbooks Program.',
+    'developerRole': 'Project founder and main administrator',
+    'developerMessage':
+        'My goal is to create an easy, modern and useful way for Helmand University students to access academic resources and textbooks. With the help of technology, I want to provide digital services for my university and community that bring lasting benefit in knowledge and progress.',
+    'subject': 'Subject',
+    'tapToOpen': 'Tap to open',
+    'savedOfflineNote':
+        'This app also works without internet; opening a book needs internet.',
+  };
+}
