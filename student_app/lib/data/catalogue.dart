@@ -9,6 +9,7 @@
 // are listed; departments with no eCampus book show a note in the app.
 
 import '../models/book.dart';
+export '../models/book.dart';
 
 const faculties = <Faculty>[
   Faculty(id: "agri", namePs: "کرهڼې", nameEn: "Agriculture"),
