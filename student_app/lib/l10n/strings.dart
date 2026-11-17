@@ -75,7 +75,7 @@ class Strings {
     'totalDepartments': 'ټولې څانګې',
     'totalFaculties': 'ټول پوهنځي',
     'unknownAuthor': 'نامعلوم',
-    'version': 'نسخه 1.0.0',
+    'version': 'نسخه 1.0.0+3',
     'noBooksNote':
         'د دې څانګې کتابونه لا په eCampus کې نشته؛ کتابونه به له پوهنتون څخه راوړل شي.',
     'pcbNote':
@@ -89,6 +89,30 @@ class Strings {
     'tapToOpen': 'د پرانیستلو لپاره یې ټک کړئ',
     'savedOfflineNote':
         'دا اپ له انټرنېټ پرته هم کار کوي؛ کتابونه د لوستلو لپاره انټرنېټ غواړي.',
+    'createAccount': 'اکونټ جوړول',
+    'createAccountTitle': 'خپل اکونټ جوړ کړئ',
+    'login': 'ننوتل',
+    'loginTitle': 'بیرته ښه راغلاست',
+    'register': 'راجستر',
+    'firstName': 'نوم',
+    'surname': 'تخلص',
+    'faculty': 'پوهنځی',
+    'department': 'څانګه',
+    'selectFaculty': 'پوهنځی وټاکئ',
+    'selectDepartment': 'څانګه وټاکئ',
+    'password': 'پاسورډ',
+    'yourPhoto': 'خپل عکس',
+    'tapToAddPhoto': 'د عکس اضافه کولو لپاره ټک کړئ',
+    'allFieldsRequired': 'ټول معلومات اړین دي — مهرباني وکړئ هر څه ډک کړئ.',
+    'photoRequired': 'خپل عکس اړین دی.',
+    'invalidEmail': 'ایمیل سم نه دی.',
+    'passwordTooShort': 'پاسورډ باید لږ تر لږه ۶ توري ولري.',
+    'wrongCredentials': 'ایمیل یا پاسورډ سم نه دی.',
+    'noAccountYet': 'اکونټ نه لرئ؟',
+    'haveAccount': 'اکونټ لرئ؟',
+    'logout': 'وتل',
+    'account': 'اکونټ',
+    'welcome': 'ښه راغلاست',
   };
 
   static const Map<String, String> en = {
@@ -141,7 +165,7 @@ class Strings {
     'totalDepartments': 'Total departments',
     'totalFaculties': 'Total faculties',
     'unknownAuthor': 'Unknown',
-    'version': 'Version 1.0.0',
+    'version': 'Version 1.0.0+3',
     'noBooksNote':
         'No books for this department on eCampus yet; books will come from the university.',
     'pcbNote':
@@ -155,5 +179,30 @@ class Strings {
     'tapToOpen': 'Tap to open',
     'savedOfflineNote':
         'This app also works without internet; opening a book needs internet.',
+    'createAccount': 'Create Account',
+    'createAccountTitle': 'Create your account',
+    'login': 'Log in',
+    'loginTitle': 'Welcome back',
+    'register': 'Register',
+    'firstName': 'First name',
+    'surname': 'Surname',
+    'faculty': 'Faculty',
+    'department': 'Department',
+    'selectFaculty': 'Choose a faculty',
+    'selectDepartment': 'Choose a department',
+    'password': 'Password',
+    'yourPhoto': 'Your photo',
+    'tapToAddPhoto': 'Tap to add your photo',
+    'allFieldsRequired':
+        'All fields are required — please fill in everything.',
+    'photoRequired': 'Your photo is required.',
+    'invalidEmail': 'The email is not valid.',
+    'passwordTooShort': 'Password must be at least 6 characters.',
+    'wrongCredentials': 'Email or password is wrong.',
+    'noAccountYet': 'No account yet?',
+    'haveAccount': 'Already have an account?',
+    'logout': 'Log out',
+    'account': 'Account',
+    'welcome': 'Welcome',
   };
 }

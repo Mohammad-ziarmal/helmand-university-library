@@ -12,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'screens/auth_screen.dart';
 import 'screens/home_screen.dart';
 import 'services/store.dart';
 
@@ -98,7 +99,9 @@ class HelmandLibraryApp extends StatelessWidget {
         ),
       ),
       themeMode: state.themeMode,
-      home: const HomeScreen(),
+      // First screen: account creation (or login). After the student
+      // registers, the home screen opens.
+      home: state.isLoggedIn ? const HomeScreen() : const AuthScreen(),
     );
   }
 }

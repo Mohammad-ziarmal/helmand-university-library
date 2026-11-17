@@ -1,7 +1,7 @@
 name: student_app
 description: "Helmand University Digital Library - Student App"
 publish_to: "none"
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -15,6 +15,12 @@ dependencies:
   provider: ^6.1.2
   shared_preferences: ^2.2.3
   url_launcher: ^6.3.0
+  # Local student accounts: pick a profile photo and store it on the
+  # phone (file_picker + path_provider), and hash the password
+  # (crypto, pure Dart). No account data leaves the phone for now.
+  file_picker: ^12.0.0
+  path_provider: ^2.1.2
+  crypto: ^3.0.3
   # Supabase is OPTIONAL for the student app. The app works fully offline
   # from the bundled catalogue (lib/data/catalogue.dart). Supabase is only
   # used later, when the backend is connected. Keys are never in this code:

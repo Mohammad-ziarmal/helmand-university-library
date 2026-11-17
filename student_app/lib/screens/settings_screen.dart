@@ -69,6 +69,22 @@ class SettingsScreen extends StatelessWidget {
             tr(context, 'version'),
             style: Theme.of(context).textTheme.bodySmall,
           ),
+          const SizedBox(height: 24),
+          Text(
+            tr(context, 'account'),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          if (state.currentAccount != null)
+            Text(state.currentAccount!.fullName),
+          if (state.currentAccount != null) const SizedBox(height: 8),
+          OutlinedButton.icon(
+            // Logging out returns the app to the account screen.
+            // Language, theme and favourites stay on the phone.
+            onPressed: () => state.logout(),
+            icon: const Icon(Icons.logout),
+            label: Text(tr(context, 'logout')),
+          ),
         ],
       ),
     );

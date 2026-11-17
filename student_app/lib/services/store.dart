@@ -1,9 +1,13 @@
-// App state: language (Pashto RTL / English LTR), theme (light/dark) and
-// favourite books. Everything is stored on the phone with
-// shared_preferences, so it works without internet and without an account.
+// App state: language (Pashto RTL / English LTR), theme (light/dark),
+// favourite books and the local student account. Everything is stored
+// on the phone with shared_preferences, so it works without internet.
+// The account is local for now; it can switch to Supabase Auth later
+// (see services/account.dart).
 
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'account.dart';
 
 class AppState extends ChangeNotifier {
   AppState(this._prefs) {
@@ -15,6 +19,7 @@ class AppState extends ChangeNotifier {
       _ => ThemeMode.system,
     };
     _favorites = _prefs.getStringList('favorites')?.toSet() ?? <String>{};
+    _account = AccountService.load(_prefs);
   }
 
   final SharedPreferences _prefs;
@@ -27,6 +32,29 @@ class AppState extends ChangeNotifier {
 
   Set<String> _favorites = <String>{};
   Set<String> get favorites => _favorites;
+
+  Account? _account;
+  Account? get currentAccount => _account;
+  bool get isLoggedIn => _account != null;
+
+  /// Save a new account (register) and log in.
+  Future<void> setAccount(Account account, String password) async {
+    await AccountService.save(_prefs, account, password);
+    _account = account;
+    notifyListeners();
+  }
+
+  /// Check the typed password against the stored hash (login).
+  bool checkPassword(String password) =>
+      AccountService.checkPassword(_prefs, password);
+
+  /// Log out: the account is removed. Language, theme and
+  /// favourites stay on the phone.
+  Future<void> logout() async {
+    await AccountService.clear(_prefs);
+    _account = null;
+    notifyListeners();
+  }
 
   Future<void> setPashto(bool value) async {
     _isPashto = value;
