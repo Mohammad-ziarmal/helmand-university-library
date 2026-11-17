@@ -150,7 +150,7 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.school,
             title: tr(context, 'universityLibrary'),
             subtitle: tr(context, 'universityLibraryDesc'),
-            gradient: const [Color(0xFF1565C0), Color(0xFF1E88D6)],
+            gradient: const [Color(0xFF0D47A1), Color(0xFF29B6F6)],
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const FacultiesScreen()),
             ),
@@ -159,7 +159,7 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.auto_stories,
             title: tr(context, 'readingLibrary'),
             subtitle: tr(context, 'readingLibraryDesc'),
-            gradient: const [Color(0xFF00695C), Color(0xFF26A69A)],
+            gradient: const [Color(0xFF00796B), Color(0xFF4DB6AC)],
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const ReadingLibraryScreen()),
             ),
@@ -168,7 +168,7 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.person,
             title: tr(context, 'developerProfile'),
             subtitle: tr(context, 'developerProfileDesc'),
-            gradient: const [Color(0xFF8D6E00), Color(0xFFC9A227)],
+            gradient: const [Color(0xFF9C7C00), Color(0xFFFFC107)],
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const DeveloperScreen()),
             ),
@@ -254,8 +254,8 @@ class _SectionCard extends StatelessWidget {
         ),
         boxShadow: [
           BoxShadow(
-            color: gradient.first.withOpacity(0.35),
-            blurRadius: 16,
+            color: gradient.first.withOpacity(0.5),
+            blurRadius: 20,
             offset: const Offset(0, 6),
           ),
         ],
@@ -273,10 +273,10 @@ class _SectionCard extends StatelessWidget {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.25),
+                    color: Colors.white.withOpacity(0.35),
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(icon, color: Colors.white, size: 30),
+                  child: Icon(icon, color: Colors.white, size: 32),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -299,7 +299,7 @@ class _SectionCard extends StatelessWidget {
                         style: Theme.of(context)
                             .textTheme
                             .bodyMedium
-                            ?.copyWith(color: Colors.white.withOpacity(0.9)),
+                            ?.copyWith(color: Colors.white),
                       ),
                     ],
                   ),
