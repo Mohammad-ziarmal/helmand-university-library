@@ -45,10 +45,10 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Set up Gradle 8.7
+      - name: Set up Gradle 9.5.0
         uses: gradle/actions/setup-gradle@v3
         with:
-          gradle-version: "8.7"
+          gradle-version: "9.5.0"
 
       - name: Create local.properties
         # settings.gradle reads flutter.sdk from android/local.properties,
@@ -60,7 +60,7 @@ jobs:
         working-directory: ${{ matrix.app }}/android
 
       - name: Generate Gradle wrapper
-        run: gradle wrapper --gradle-version 8.7
+        run: gradle wrapper --gradle-version 9.5.0
         working-directory: ${{ matrix.app }}/android
 
       - name: Get packages
