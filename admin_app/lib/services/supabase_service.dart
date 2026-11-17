@@ -235,14 +235,17 @@ class SupabaseService {
   /// bucket "books". Returns the public URL of the uploaded file.
   static Future<String> pickAndUploadPdf() async {
     _requireConfigured();
-    final result = await FilePicker.platform.pickFiles(
+    // file_picker 12: static API, no FilePicker.platform; pickFile()
+    // returns one PlatformFile, and bytes are read on demand.
+    final file = await FilePicker.pickFile(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
-      withData: true,
     );
-    final file = result?.files.single;
-    final bytes = file?.bytes;
-    if (file == null || bytes == null) {
+    if (file == null) {
+      throw Exception('No PDF was selected.');
+    }
+    final bytes = await file.readAsBytes();
+    if (bytes == null) {
       throw Exception('No PDF was selected.');
     }
     final safeName = file.name.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
