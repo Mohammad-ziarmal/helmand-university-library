@@ -37,6 +37,14 @@ class _AuthScreenState extends State<AuthScreen> {
   final _password = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // If an account already exists on this phone (e.g. after logout),
+    // open the login form; otherwise open registration.
+    _isRegister = context.read<AppState>().currentAccount == null;
+  }
+
+  @override
   void dispose() {
     _firstName.dispose();
     _surname.dispose();
@@ -108,7 +116,7 @@ class _AuthScreenState extends State<AuthScreen> {
     await context.read<AppState>().setAccount(account, password);
   }
 
-  void _submitLogin() {
+  void _submitLogin() async {
     final state = context.read<AppState>();
     final isPs = state.isPashto;
     final email = _email.text.trim();
@@ -122,8 +130,9 @@ class _AuthScreenState extends State<AuthScreen> {
       setState(() => _error = Strings.t('wrongCredentials', isPs));
       return;
     }
-    // The account is already on the phone, so the student is logged
-    // in and the home screen appears automatically.
+    // Correct email and password: start the session, and the home
+    // screen appears automatically (main.dart watches isLoggedIn).
+    await state.login();
   }
 
   Widget _field(

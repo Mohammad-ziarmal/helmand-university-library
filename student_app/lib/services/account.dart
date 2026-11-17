@@ -57,6 +57,7 @@ class Account {
 class AccountService {
   static const _accountKey = 'account';
   static const _passwordHashKey = 'accountPasswordHash';
+  static const _sessionKey = 'accountLoggedIn';
 
   /// SHA-256 hash of the password. The plain password is never saved.
   static String hashPassword(String password) =>
@@ -80,6 +81,19 @@ class AccountService {
   ) async {
     await prefs.setString(_accountKey, jsonEncode(account.toJson()));
     await prefs.setString(_passwordHashKey, hashPassword(password));
+    await prefs.setBool(_sessionKey, true);
+  }
+
+  /// Is a student currently logged in? The account itself stays on the
+  /// phone even after logout, so login still works afterwards.
+  static bool isLoggedIn(SharedPreferences prefs) =>
+      prefs.getBool(_sessionKey) ?? false;
+
+  static Future<void> setLoggedIn(
+    SharedPreferences prefs,
+    bool value,
+  ) async {
+    await prefs.setBool(_sessionKey, value);
   }
 
   static bool checkPassword(SharedPreferences prefs, String password) {
@@ -88,10 +102,13 @@ class AccountService {
     return stored == hashPassword(password);
   }
 
-  /// Remove the account (logout). Language, theme and favourites stay.
+  /// Delete the whole account (only for a future "delete my account"
+  /// action). Logout does NOT call this — it only ends the session, so
+  /// the student can log back in with the same email and password.
   static Future<void> clear(SharedPreferences prefs) async {
     await prefs.remove(_accountKey);
     await prefs.remove(_passwordHashKey);
+    await prefs.remove(_sessionKey);
   }
 
   /// Copy a picked photo into the app documents directory and return

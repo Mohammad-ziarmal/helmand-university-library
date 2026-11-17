@@ -20,6 +20,7 @@ class AppState extends ChangeNotifier {
     };
     _favorites = _prefs.getStringList('favorites')?.toSet() ?? <String>{};
     _account = AccountService.load(_prefs);
+    _loggedIn = AccountService.isLoggedIn(_prefs);
   }
 
   final SharedPreferences _prefs;
@@ -35,12 +36,26 @@ class AppState extends ChangeNotifier {
 
   Account? _account;
   Account? get currentAccount => _account;
-  bool get isLoggedIn => _account != null;
+
+  bool _loggedIn = false;
+
+  /// Logged in only when an account exists AND the session is active.
+  /// After logout the account stays on the phone, so the student can
+  /// log back in with the same email and password.
+  bool get isLoggedIn => _account != null && _loggedIn;
 
   /// Save a new account (register) and log in.
   Future<void> setAccount(Account account, String password) async {
     await AccountService.save(_prefs, account, password);
     _account = account;
+    _loggedIn = true;
+    notifyListeners();
+  }
+
+  /// Log in with the account already on the phone (login screen).
+  Future<void> login() async {
+    await AccountService.setLoggedIn(_prefs, true);
+    _loggedIn = true;
     notifyListeners();
   }
 
@@ -48,11 +63,11 @@ class AppState extends ChangeNotifier {
   bool checkPassword(String password) =>
       AccountService.checkPassword(_prefs, password);
 
-  /// Log out: the account is removed. Language, theme and
-  /// favourites stay on the phone.
+  /// Log out: only the session ends. The account, language, theme
+  /// and favourites stay on the phone.
   Future<void> logout() async {
-    await AccountService.clear(_prefs);
-    _account = null;
+    await AccountService.setLoggedIn(_prefs, false);
+    _loggedIn = false;
     notifyListeners();
   }
 
