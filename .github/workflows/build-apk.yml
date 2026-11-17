@@ -10,6 +10,11 @@
 # setup screen. Add the secrets in:
 #   Repository Settings > Secrets and variables > Actions > New secret
 # Never put real keys in the code.
+#
+# Release signing (required): KEYSTORE_BASE64, KEYSTORE_PASSWORD,
+# KEY_ALIAS, KEY_PASSWORD. One permanent release keystore signs every
+# build, so updates install over the old version. Without these secrets
+# the build fails instead of silently signing with a throwaway debug key.
 
 name: Build APKs
 
@@ -62,6 +67,26 @@ jobs:
       - name: Generate Gradle wrapper
         run: gradle wrapper --gradle-version 9.5.0
         working-directory: ${{ matrix.app }}/android
+
+      - name: Set up release signing keystore
+        # The release keystore lives only in GitHub Secrets. Decode it
+        # here and write key.properties for Gradle; both live only on
+        # this throwaway runner and never enter the repo.
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "Release signing secret KEYSTORE_BASE64 is not set"; exit 1; fi
+          echo "$KEYSTORE_BASE64" | base64 -d > app/release.p12
+          cat > key.properties <<EOF
+          storeFile=release.p12
+          storePassword=$KEYSTORE_PASSWORD
+          keyAlias=$KEY_ALIAS
+          keyPassword=$KEY_PASSWORD
+          EOF
+        working-directory: ${{ matrix.app }}/android
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
       - name: Get packages
         run: flutter pub get

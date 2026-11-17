@@ -46,12 +46,38 @@ android {
         versionName = flutterVersionName
     }
 
+    // Release signing: the keystore and its passwords come from
+    // key.properties (written by CI from GitHub Secrets). They are never
+    // in the code or the repo. Without key.properties, fall back to the
+    // debug key so a local test build still works.
+    def keystoreProperties = new Properties()
+    def keystorePropertiesFile = rootProject.file("key.properties")
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.withReader("UTF-8") { reader -> keystoreProperties.load(reader) }
+    }
+
+    signingConfigs {
+        release {
+            if (keystoreProperties.getProperty("storeFile") != null) {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+                storeType = "PKCS12"
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // Test releases are signed with the debug key. Before a public
-            // release, create a real keystore and add signingConfig here.
-            // Never commit a keystore or its passwords to GitHub.
-            signingConfig = signingConfigs.debug
+            // One permanent release key for this app: every build is
+            // signed with the same key, so updates install over the old
+            // version instead of failing with "App not installed".
+            if (keystoreProperties.getProperty("storeFile") != null) {
+                signingConfig = signingConfigs.release
+            } else {
+                signingConfig = signingConfigs.debug
+            }
         }
     }
 }
