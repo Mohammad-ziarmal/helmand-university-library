@@ -34,12 +34,18 @@ class LibraryBook {
   final String title;
   final String author;
   final List<String> departmentIds;
+  /// Which semesters of each department teach the subject this book
+  /// covers: department id -> semester numbers. Empty when the book
+  /// matches no named subject of that department; such books stay in
+  /// the catalogue (and in search) but appear on no semester page.
+  final Map<String, List<int>> semestersByDepartment;
   final String pdfUrl;
   /// True when the book is found through the eCampus PCB textbooks page
   /// rather than a direct PDF link.
   final bool viaPcbPage;
   const LibraryBook({required this.id, required this.title, required this.author,
-    required this.departmentIds, required this.pdfUrl, required this.viaPcbPage});
+    required this.departmentIds, required this.semestersByDepartment,
+    required this.pdfUrl, required this.viaPcbPage});
 }
 
 class ReadingBook {

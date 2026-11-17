@@ -185,7 +185,12 @@ class SemesterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPs = context.watchAppStateIsPashto();
     final subjectList = subjectsOf(department.id, semester);
-    final books = booksOfDepartment(department.id);
+    // Only this semester's own subjects' books. Semester 0 is the
+    // Islamic Culture service department: it has no semesters, so its
+    // general books still come from the whole department.
+    final books = semester == 0
+        ? booksOfDepartment(department.id)
+        : booksOfSemester(department.id, semester);
     final title = semester == 0
         ? tr(context, 'generalSubjects')
         : '${tr(context, 'semester')} $semester';

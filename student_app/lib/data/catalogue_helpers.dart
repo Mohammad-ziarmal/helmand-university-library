@@ -17,6 +17,16 @@ List<LibraryBook> booksOfDepartment(String departmentId) => libraryBooks
     .where((b) => b.departmentIds.contains(departmentId))
     .toList();
 
+/// Only the books of one semester: the books whose subject is taught
+/// in that semester of that department. Books that match no named
+/// subject have an empty map and appear on no semester page.
+List<LibraryBook> booksOfSemester(String departmentId, int semester) =>
+    libraryBooks
+    .where((b) =>
+        (b.semestersByDepartment[departmentId] ?? const <int>[])
+            .contains(semester))
+    .toList();
+
 /// Subjects of one semester. For the Islamic Culture service department
 /// pass semester 0 to get its general subjects.
 List<Subject> subjectsOf(String departmentId, int semester) =>
