@@ -50,6 +50,15 @@ jobs:
         with:
           gradle-version: "8.7"
 
+      - name: Create local.properties
+        # settings.gradle reads flutter.sdk from android/local.properties,
+        # but that file is local-only (gitignored) and never exists on the
+        # runner. Write it from the Flutter install before Gradle runs.
+        run: |
+          FLUTTER_SDK="$(dirname "$(dirname "$(command -v flutter)")")"
+          echo "flutter.sdk=$FLUTTER_SDK" > local.properties
+        working-directory: ${{ matrix.app }}/android
+
       - name: Generate Gradle wrapper
         run: gradle wrapper --gradle-version 8.7
         working-directory: ${{ matrix.app }}/android
