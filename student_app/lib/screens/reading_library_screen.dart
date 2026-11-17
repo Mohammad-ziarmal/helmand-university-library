@@ -97,7 +97,11 @@ class _ReadingLibraryScreenState extends State<ReadingLibraryScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           const CircleAvatar(
-                            child: Icon(Icons.auto_stories),
+                            backgroundColor: Color(0xFF00796B),
+                            child: Icon(
+                              Icons.auto_stories,
+                              color: Colors.white,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -108,7 +112,8 @@ class _ReadingLibraryScreenState extends State<ReadingLibraryScreen> {
                                   book.title,
                                   style: Theme.of(context)
                                       .textTheme
-                                      .titleMedium,
+                                      .titleMedium
+                                      ?.copyWith(fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(

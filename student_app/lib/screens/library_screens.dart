@@ -24,12 +24,17 @@ class FacultiesScreen extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.school)),
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFF1565C0),
+                child: Icon(Icons.school, color: Colors.white),
+              ),
               title: Text(
                 context.watchAppStateIsPashto()
                     ? faculty.namePs
                     : faculty.nameEn,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               subtitle: Text(
                 '${tr(context, 'departments')}: $count',
@@ -68,10 +73,15 @@ class DepartmentsScreen extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.account_balance)),
+              leading: const CircleAvatar(
+                backgroundColor: Color(0xFF00796B),
+                child: Icon(Icons.account_balance, color: Colors.white),
+              ),
               title: Text(
                 isPs ? dept.namePs : dept.nameEn,
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               subtitle: Text(
                 dept.isService
@@ -126,10 +136,21 @@ class SemestersScreen extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
-              leading: CircleAvatar(child: Text('$semester')),
+              leading: CircleAvatar(
+                backgroundColor: const Color(0xFFC9A227),
+                child: Text(
+                  '$semester',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
               title: Text(
                 '${tr(context, 'semester')} $semester',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
               ),
               subtitle: Text('${tr(context, 'subjects')}: $count'),
               trailing: const Icon(Icons.arrow_forward_ios, size: 16),
@@ -188,8 +209,14 @@ class SemesterScreen extends StatelessWidget {
             (s) => Card(
               margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               child: ListTile(
-                leading: const Icon(Icons.book_outlined),
-                title: Text(s.name),
+                leading:
+                    const Icon(Icons.book_outlined, color: Color(0xFF1565C0)),
+                title: Text(
+                  s.name,
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
                 subtitle: s.code.isEmpty
                     ? null
                     : Text('${tr(context, 'code')}: ${s.code}'),

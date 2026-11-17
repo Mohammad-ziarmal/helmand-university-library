@@ -88,9 +88,19 @@ class _SearchScreenState extends State<SearchScreen> {
                                   vertical: 4,
                                 ),
                                 child: ListTile(
-                                  leading:
-                                      const Icon(Icons.book_outlined),
-                                  title: Text(e.subject.name),
+                                  leading: const Icon(
+                                    Icons.book_outlined,
+                                    color: Color(0xFF1565C0),
+                                  ),
+                                  title: Text(
+                                    e.subject.name,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
                                   subtitle: Text(
                                     isPs ? e.dept.namePs : e.dept.nameEn,
                                   ),

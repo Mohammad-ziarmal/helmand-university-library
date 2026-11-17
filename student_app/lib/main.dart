@@ -72,9 +72,9 @@ class HelmandLibraryApp extends StatelessWidget {
           elevation: 0,
         ),
         cardTheme: CardThemeData(
-          elevation: 2,
+          elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
           ),
         ),
       ),
@@ -92,9 +92,9 @@ class HelmandLibraryApp extends StatelessWidget {
           elevation: 0,
         ),
         cardTheme: CardThemeData(
-          elevation: 2,
+          elevation: 4,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
           ),
         ),
       ),
