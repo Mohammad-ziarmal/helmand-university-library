@@ -1,6 +1,8 @@
 // Home screen: three main sections (University Library, Reading Library,
-// Developer Profile), quick search, favourites and settings, and a list
-// of new books.
+// Developer Profile), quick search, favourites and settings.
+//
+// The three section cards share one uniform height so they look neat and
+// organised; the developer card shows the developer's name big and bold.
 //
 // Design: branded hero header with the university logo on a deep navy
 // gradient, large gradient section cards, soft rounded cards everywhere.
@@ -9,7 +11,6 @@ import 'package:flutter/material.dart';
 
 import '../data/catalogue.dart';
 import '../l10n/strings.dart';
-import 'book_tile.dart';
 import 'developer_screen.dart';
 import 'favorites_screen.dart';
 import 'library_screens.dart';
@@ -168,31 +169,16 @@ class HomeScreen extends StatelessWidget {
             icon: Icons.person,
             title: tr(context, 'developerProfile'),
             subtitle: tr(context, 'developerProfileDesc'),
+            subtitleStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+            ),
             gradient: const [Color(0xFF9C7C00), Color(0xFFFFC107)],
             onTap: () => Navigator.of(context).push(
               MaterialPageRoute(builder: (_) => const DeveloperScreen()),
             ),
           ),
-
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-            child: Text(
-              tr(context, 'newBooks'),
-              style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16),
-            child: Text(
-              tr(context, 'freeBooksNote'),
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-          const SizedBox(height: 8),
-          // New books: the first books of the catalogue.
-          ...libraryBooks.take(8).map((book) => BookTile(book: book)),
         ],
       ),
     );
@@ -230,6 +216,7 @@ class _SectionCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
+    this.subtitleStyle,
     required this.gradient,
     required this.onTap,
   });
@@ -237,6 +224,7 @@ class _SectionCard extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
+  final TextStyle? subtitleStyle;
   final List<Color> gradient;
   final VoidCallback onTap;
 
@@ -244,6 +232,7 @@ class _SectionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isRtl = Directionality.of(context) == TextDirection.rtl;
     return Container(
+      height: 112,
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
@@ -285,6 +274,8 @@ class _SectionCard extends StatelessWidget {
                     children: [
                       Text(
                         title,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                         style: Theme.of(context)
                             .textTheme
                             .titleMedium
@@ -296,10 +287,13 @@ class _SectionCard extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         subtitle,
-                        style: Theme.of(context)
-                            .textTheme
-                            .bodyMedium
-                            ?.copyWith(color: Colors.white),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: subtitleStyle ??
+                            Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: Colors.white),
                       ),
                     ],
                   ),
