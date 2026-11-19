@@ -5,7 +5,7 @@
 -- It is safe to run twice: tables are created IF NOT EXISTS and
 -- the seed data uses ON CONFLICT DO NOTHING.
 --
--- Structure: 6 faculties, 22 departments (verified against
+-- Structure: 6 faculties, 19 departments (verified against
 -- helu.edu.af and the university catalogs, 1404).
 -- The student app also carries this catalogue bundled in its code
 -- (lib/data/catalogue.dart), so it works offline even before this
@@ -178,7 +178,7 @@ create table if not exists settings (
 
 -- ----------------------------------------------------------
 -- Seed data: roles, academic years, faculties, departments.
--- Verified structure: 6 faculties, 22 departments.
+-- Verified structure: 6 faculties, 19 departments.
 -- ----------------------------------------------------------
 insert into roles (name, description) values
   ('super_admin', 'Mohammad Ziarmal - full control'),
@@ -215,10 +215,7 @@ insert into departments (faculty_id, name_ps, name_en, semesters, sort_order) va
   ('33333333-3333-3333-3333-333333333333', 'د اوبو زیرمو او چاپېریال ساتنه', 'Water Resources & Environment Protection', 8, 1),
   ('33333333-3333-3333-3333-333333333333', 'سیول', 'Civil', 8, 2),
   ('33333333-3333-3333-3333-333333333333', 'برق', 'Electricity', 8, 3),
-  ('44444444-4444-4444-4444-444444444444', 'کلینیکي', 'Clinical', 10, 1),
-  ('44444444-4444-4444-4444-444444444444', 'پاراکلینیکي', 'Paraclinical', 10, 2),
-  ('44444444-4444-4444-4444-444444444444', 'د غذایي موادو ټکنالوژي', 'Food Technology', 10, 3),
-  ('44444444-4444-4444-4444-444444444444', 'پری‌کلینیکي', 'Preclinical', 10, 4),
+  ('44444444-4444-4444-4444-444444444444', 'عمومی وترنری', 'General Veterinary', 10, 1),
   ('55555555-5555-5555-5555-555555555555', 'مالي او بانکي', 'Finance & Banking', 8, 1),
   ('55555555-5555-5555-5555-555555555555', 'اداره او تجارت', 'Administration & Business', 8, 2),
   ('66666666-6666-6666-6666-666666666666', 'اسلامي تعلیمات', 'Islamic Teachings', 8, 1),

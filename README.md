@@ -10,7 +10,7 @@
 
 ```text
 helmand-university-flutter-project/
-  student_app/        # د محصلینو اپ (6 پوهنځي، 22 څانګې، 171 کتابونه)
+  student_app/        # د محصلینو اپ (6 پوهنځي، 19 څانګې، 171 کتابونه)
     lib/
       main.dart
       data/catalogue.dart   # ټول پوهنځي، څانګې، سمسترونه او کتابونه
