@@ -68,7 +68,7 @@ Future<void> shareBookLink(
 }) async {
   final text =
       '$title\n${tr(context, 'author')}: $author\n${tr(context, 'appTitle')}\n$pdfUrl';
-  await Share.share(text, subject: title);
+  await SharePlus.instance.share(ShareParams(text: text, subject: title));
 }
 
 class BookTile extends StatelessWidget {
