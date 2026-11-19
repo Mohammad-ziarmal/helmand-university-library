@@ -121,6 +121,11 @@ jobs:
     permissions:
       contents: write
     steps:
+      - name: Checkout code
+        # gh determines the repository from the git remote, so the
+        # release commands need a checkout even though no code is built.
+        uses: actions/checkout@v4
+
       - name: Download student APK
         uses: actions/download-artifact@v4
         with:
