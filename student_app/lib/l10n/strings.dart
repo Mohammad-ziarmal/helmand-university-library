@@ -113,6 +113,9 @@ class Strings {
     'logout': 'وتل',
     'account': 'اکونټ',
     'welcome': 'ښه راغلاست',
+    'share': 'شریکول',
+    'internetRequired':
+        'د اکونټ جوړولو لپاره انټرنیت فعال کړئ — بغیر له انټرنیټ څخه اکونټ نه جوړېږي.',
   };
 
   static const Map<String, String> en = {
@@ -204,5 +207,8 @@ class Strings {
     'logout': 'Log out',
     'account': 'Account',
     'welcome': 'Welcome',
+    'share': 'Share',
+    'internetRequired':
+        'Turn on the internet to create an account — an account cannot be created without internet.',
   };
 }

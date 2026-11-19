@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../data/catalogue.dart';
@@ -55,6 +56,19 @@ Future<void> openReadingPdf(
       ),
     );
   }
+}
+
+/// Share a book (title, author, PDF link) with the system share sheet,
+/// so a student can send it to a friend on WhatsApp or anywhere else.
+Future<void> shareBookLink(
+  BuildContext context, {
+  required String title,
+  required String author,
+  required String pdfUrl,
+}) async {
+  final text =
+      '$title\n${tr(context, 'author')}: $author\n${tr(context, 'appTitle')}\n$pdfUrl';
+  await Share.share(text, subject: title);
 }
 
 class BookTile extends StatelessWidget {
@@ -130,13 +144,28 @@ class BookTile extends StatelessWidget {
                     ],
                   ),
                 ),
-                IconButton(
-                  icon: Icon(
-                    isFav ? Icons.favorite : Icons.favorite_border,
-                    color: isFav ? Colors.red : null,
-                  ),
-                  onPressed: () => state.toggleFavorite(book.id),
-                  tooltip: tr(context, 'favorites'),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.share),
+                      onPressed: () => shareBookLink(
+                        context,
+                        title: book.title,
+                        author: book.author,
+                        pdfUrl: book.pdfUrl,
+                      ),
+                      tooltip: tr(context, 'share'),
+                    ),
+                    IconButton(
+                      icon: Icon(
+                        isFav ? Icons.favorite : Icons.favorite_border,
+                        color: isFav ? Colors.red : null,
+                      ),
+                      onPressed: () => state.toggleFavorite(book.id),
+                      tooltip: tr(context, 'favorites'),
+                    ),
+                  ],
                 ),
               ],
             ),

@@ -129,6 +129,16 @@ class _ReadingLibraryScreenState extends State<ReadingLibraryScreen> {
                               ],
                             ),
                           ),
+                          IconButton(
+                            icon: const Icon(Icons.share),
+                            onPressed: () => shareBookLink(
+                              context,
+                              title: book.title,
+                              author: book.author,
+                              pdfUrl: book.pdfUrl,
+                            ),
+                            tooltip: tr(context, 'share'),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 8),

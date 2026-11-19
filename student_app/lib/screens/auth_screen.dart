@@ -74,8 +74,25 @@ class _AuthScreenState extends State<AuthScreen> {
     }
   }
 
+  /// True when the phone can actually reach the internet.
+  /// Account creation requires internet: without it, no account
+  /// may be created.
+  Future<bool> _hasInternet() async {
+    try {
+      final result = await InternetAddress.lookup('example.com')
+          .timeout(const Duration(seconds: 5));
+      return result.isNotEmpty && result.first.rawAddress.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> _submitRegister() async {
     final isPs = context.read<AppState>().isPashto;
+    if (!await _hasInternet()) {
+      setState(() => _error = Strings.t('internetRequired', isPs));
+      return;
+    }
     final firstName = _firstName.text.trim();
     final surname = _surname.text.trim();
     final email = _email.text.trim();
