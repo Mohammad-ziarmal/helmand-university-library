@@ -4,6 +4,11 @@
 // department, email and password. The account is stored on the phone
 // for now (see services/account.dart); later it can switch to
 // Supabase Auth without changing this screen.
+//
+// Design: every field lives in its own colourful card (the app
+// palette: red / yellow / blue / brown / green), so the page is
+// not a plain white form any more. Only the look changed —
+// the fields, the order and the validation are exactly the same.
 
 import 'dart:io';
 
@@ -16,6 +21,14 @@ import '../data/catalogue.dart';
 import '../l10n/strings.dart';
 import '../services/account.dart';
 import '../services/store.dart';
+
+// App palette (same colours as the faculty/department cards).
+const _kRed = Color(0xFFC62828);
+const _kYellow = Color(0xFFF9A825);
+const _kBlue = Color(0xFF1565C0);
+const _kBrown = Color(0xFF6D4C41);
+const _kGreen = Color(0xFF2E7D32);
+const _kNavy = Color(0xFF0B2535);
 
 class AuthScreen extends StatefulWidget {
   const AuthScreen({super.key});
@@ -152,22 +165,161 @@ class _AuthScreenState extends State<AuthScreen> {
     await state.login();
   }
 
-  Widget _field(
-    BuildContext context,
-    TextEditingController controller,
-    String labelKey, {
+  /// One colourful card holding one field: a coloured icon in a
+  /// tinted circle, a small bold coloured label, and the input
+  /// itself on a very light tint of the same colour.
+  Widget _fieldCard(
+    BuildContext context, {
+    required Color color,
+    required IconData icon,
+    required String label,
+    required Widget child,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: color.withOpacity(0.45), width: 1.5),
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: color.withOpacity(0.15),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: color, size: 24),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 13,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  child,
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _textCard(
+    BuildContext context, {
+    required Color color,
+    required IconData icon,
+    required String labelKey,
+    required TextEditingController controller,
     bool obscure = false,
     TextInputType? keyboardType,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+    return _fieldCard(
+      context,
+      color: color,
+      icon: icon,
+      label: tr(context, labelKey),
       child: TextField(
         controller: controller,
         obscureText: obscure,
         keyboardType: keyboardType,
         decoration: InputDecoration(
-          labelText: tr(context, labelKey),
-          border: const OutlineInputBorder(),
+          hintText: tr(context, labelKey),
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+      ),
+    );
+  }
+
+  Widget _dropdownCard(
+    BuildContext context, {
+    required Color color,
+    required IconData icon,
+    required String labelKey,
+    required String hintKey,
+    required String? value,
+    required List<DropdownMenuItem<String>> items,
+    required ValueChanged<String?>? onChanged,
+  }) {
+    return _fieldCard(
+      context,
+      color: color,
+      icon: icon,
+      label: tr(context, labelKey),
+      child: DropdownButtonFormField<String>(
+        value: value,
+        decoration: const InputDecoration(
+          border: InputBorder.none,
+          isDense: true,
+          contentPadding: EdgeInsets.zero,
+        ),
+        hint: Text(tr(context, hintKey)),
+        isExpanded: true,
+        items: items,
+        onChanged: onChanged,
+      ),
+    );
+  }
+
+  Widget _gradientButton(BuildContext context, String label, VoidCallback onTap) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(16),
+        gradient: const LinearGradient(
+          colors: [_kBlue, _kGreen],
+          begin: Alignment.centerRight,
+          end: Alignment.centerLeft,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: _kBlue.withOpacity(0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -208,113 +360,187 @@ class _AuthScreenState extends State<AuthScreen> {
         ],
       ),
       body: ListView(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(16),
         children: [
-          Center(
-            child: Image.asset('assets/images/logo.png', width: 84, height: 84),
-          ),
-          const SizedBox(height: 12),
-          Center(
-            child: Text(
-              _isRegister
-                  ? tr(context, 'createAccountTitle')
-                  : tr(context, 'loginTitle'),
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+          // Colourful header banner: logo, app name, page title.
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              gradient: const LinearGradient(
+                colors: [_kNavy, _kBlue],
+                begin: Alignment.topRight,
+                end: Alignment.bottomLeft,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: _kBlue.withOpacity(0.3),
+                  blurRadius: 14,
+                  offset: const Offset(0, 6),
+                ),
+              ],
+            ),
+            child: Column(
+              children: [
+                Image.asset('assets/images/logo.png', width: 76, height: 76),
+                const SizedBox(height: 10),
+                Text(
+                  _isRegister
+                      ? tr(context, 'createAccountTitle')
+                      : tr(context, 'loginTitle'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
-              textAlign: TextAlign.center,
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 20),
           if (_isRegister) ...[
-            Center(
+            // Photo card (red): tap to choose your photo.
+            Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 14),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                gradient: const LinearGradient(
+                  colors: [_kRed, Color(0xFFE65100)],
+                  begin: Alignment.topRight,
+                  end: Alignment.bottomLeft,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: _kRed.withOpacity(0.3),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
               child: GestureDetector(
                 onTap: _pickPhoto,
-                child: _photoFile == null
-                    ? const CircleAvatar(
-                        radius: 52,
-                        child: Icon(Icons.add_a_photo, size: 32),
-                      )
-                    : CircleAvatar(
-                        radius: 52,
-                        backgroundImage: FileImage(_photoFile!),
+                child: Row(
+                  children: [
+                    _photoFile == null
+                        ? const CircleAvatar(
+                            radius: 34,
+                            backgroundColor: Colors.white,
+                            child: Icon(Icons.add_a_photo,
+                                size: 30, color: _kRed),
+                          )
+                        : CircleAvatar(
+                            radius: 34,
+                            backgroundImage: FileImage(_photoFile!),
+                          ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Text(
+                        tr(context, 'tapToAddPhoto'),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-              ),
-            ),
-            const SizedBox(height: 6),
-            Center(
-              child: Text(
-                tr(context, 'tapToAddPhoto'),
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ),
-            const SizedBox(height: 16),
-            _field(context, _firstName, 'firstName'),
-            _field(context, _surname, 'surname'),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: DropdownButtonFormField<String>(
-                value: _facultyId,
-                decoration: InputDecoration(
-                  labelText: tr(context, 'faculty'),
-                  border: const OutlineInputBorder(),
+                    ),
+                    const Icon(Icons.camera_alt,
+                        color: Colors.white, size: 26),
+                  ],
                 ),
-                hint: Text(tr(context, 'selectFaculty')),
-                items: faculties
-                    .map(
-                      (f) => DropdownMenuItem<String>(
-                        value: f.id,
-                        child: Text(isPs ? f.namePs : f.nameEn),
-                      ),
-                    )
-                    .toList(),
-                onChanged: (value) => setState(() {
-                  _facultyId = value;
-                  _departmentId = null;
-                }),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: DropdownButtonFormField<String>(
-                value: _departmentId,
-                decoration: InputDecoration(
-                  labelText: tr(context, 'department'),
-                  border: const OutlineInputBorder(),
-                ),
-                hint: Text(tr(context, 'selectDepartment')),
-                items: facultyDepartments
-                    .map(
-                      (d) => DropdownMenuItem<String>(
-                        value: d.id,
-                        child: Text(isPs ? d.namePs : d.nameEn),
-                      ),
-                    )
-                    .toList(),
-                onChanged: _facultyId == null
-                    ? null
-                    : (value) => setState(() => _departmentId = value),
-              ),
+            _textCard(
+              context,
+              color: _kBlue,
+              icon: Icons.person,
+              labelKey: 'firstName',
+              controller: _firstName,
+            ),
+            _textCard(
+              context,
+              color: _kGreen,
+              icon: Icons.badge,
+              labelKey: 'surname',
+              controller: _surname,
+            ),
+            _dropdownCard(
+              context,
+              color: _kYellow,
+              icon: Icons.school,
+              labelKey: 'faculty',
+              hintKey: 'selectFaculty',
+              value: _facultyId,
+              items: faculties
+                  .map(
+                    (f) => DropdownMenuItem<String>(
+                      value: f.id,
+                      child: Text(isPs ? f.namePs : f.nameEn),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) => setState(() {
+                _facultyId = value;
+                _departmentId = null;
+              }),
+            ),
+            _dropdownCard(
+              context,
+              color: _kBrown,
+              icon: Icons.account_tree,
+              labelKey: 'department',
+              hintKey: 'selectDepartment',
+              value: _departmentId,
+              items: facultyDepartments
+                  .map(
+                    (d) => DropdownMenuItem<String>(
+                      value: d.id,
+                      child: Text(isPs ? d.namePs : d.nameEn),
+                    ),
+                  )
+                  .toList(),
+              onChanged: _facultyId == null
+                  ? null
+                  : (value) => setState(() => _departmentId = value),
             ),
           ],
-          _field(
+          _textCard(
             context,
-            _email,
-            'email',
+            color: _kRed,
+            icon: Icons.email,
+            labelKey: 'email',
+            controller: _email,
             keyboardType: TextInputType.emailAddress,
           ),
-          _field(context, _password, 'password', obscure: true),
+          _textCard(
+            context,
+            color: _kBlue,
+            icon: Icons.lock,
+            labelKey: 'password',
+            controller: _password,
+            obscure: true,
+          ),
           if (_error != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              _error!,
-              style: const TextStyle(color: Colors.red),
+            Container(
+              margin: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: _kRed.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: _kRed.withOpacity(0.5)),
+              ),
+              child: Text(
+                _error!,
+                style: const TextStyle(color: _kRed),
+              ),
             ),
           ],
-          const SizedBox(height: 12),
-          FilledButton(
-            onPressed: _isRegister ? _submitRegister : _submitLogin,
-            child: Text(tr(context, _isRegister ? 'register' : 'login')),
+          const SizedBox(height: 4),
+          _gradientButton(
+            context,
+            tr(context, _isRegister ? 'register' : 'login'),
+            _isRegister ? _submitRegister : _submitLogin,
           ),
           const SizedBox(height: 8),
           TextButton(

@@ -75,7 +75,7 @@ class Strings {
     'totalDepartments': 'ټولې څانګې',
     'totalFaculties': 'ټول پوهنځي',
     'unknownAuthor': 'نامعلوم',
-    'version': 'نسخه 1.0.0+13',
+    'version': 'نسخه 1.0.0+14',
     'noBooksNote':
         'د دې څانګې کتابونه لا په eCampus کې نشته؛ کتابونه به له پوهنتون څخه راوړل شي.',
     'pcbNote':
@@ -181,7 +181,7 @@ class Strings {
     'totalDepartments': 'Total departments',
     'totalFaculties': 'Total faculties',
     'unknownAuthor': 'Unknown',
-    'version': 'Version 1.0.0+13',
+    'version': 'Version 1.0.0+14',
     'noBooksNote':
         'No books for this department on eCampus yet; books will come from the university.',
     'pcbNote':
