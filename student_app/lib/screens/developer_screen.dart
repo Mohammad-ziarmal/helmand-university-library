@@ -20,6 +20,9 @@ class DeveloperScreen extends StatelessWidget {
   // Gold theme for this page.
   static const _gold = Color(0xFFC9A227);
   static const _darkGold = Color(0xFF8D6E00);
+  // Dark navy for the name — explicit, so it stays dark and readable
+  // on the white background in both light and dark mode.
+  static const _navy = Color(0xFF0B2535);
 
   Future<void> _open(BuildContext context, Uri uri) async {
     final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
@@ -96,17 +99,34 @@ class DeveloperScreen extends StatelessWidget {
             Center(
               child: Text(
                 'محمد زیارمل',
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: const TextStyle(
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold,
+                  color: _navy,
+                ),
               ),
             ),
             Center(
               child: Text(
                 'Mohammad Ziarmal',
-                style: Theme.of(context).textTheme.titleMedium,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: _navy,
+                ),
               ),
             ),
             const SizedBox(height: 8),
-            Center(child: Text(tr(context, 'developerRole'))),
+            Center(
+              child: Text(
+                tr(context, 'developerRole'),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: _navy,
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             Card(
               child: Padding(
