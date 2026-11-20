@@ -293,7 +293,10 @@ class SemesterScreen extends StatelessWidget {
   }
 }
 
-/// The books of one subject: the books of its semester.
+/// The books of one subject — ONLY the book(s) that cover exactly
+/// this subject (see subject_books.dart). If the subject has no book
+/// yet, the page says so and that Ziarmal Sahib will upload it soon,
+/// instead of showing another subject's book.
 /// Tapping a book name opens that book's PDF directly (see BookTile).
 class SubjectBooksScreen extends StatelessWidget {
   const SubjectBooksScreen({
@@ -310,12 +313,12 @@ class SubjectBooksScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isPs = context.watchAppStateIsPashto();
-    // Only this semester's own books. Semester 0 is the Islamic
+    // Only the book(s) of THIS subject. Semester 0 is the Islamic
     // Culture service department: it has no semesters, so its general
     // books still come from the whole department.
     final books = semester == 0
         ? booksOfDepartment(department.id)
-        : booksOfSemester(department.id, semester);
+        : booksOfSubject(department.id, semester, subject.name);
     return Scaffold(
       appBar: AppBar(
         title: Text(subject.name),
@@ -344,7 +347,20 @@ class SubjectBooksScreen extends StatelessWidget {
               child: Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text(tr(context, 'noBooksNote')),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        tr(context, 'noBookForSubject'),
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleMedium
+                            ?.copyWith(fontWeight: FontWeight.bold),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(tr(context, 'bookComingSoon')),
+                    ],
+                  ),
                 ),
               ),
             )

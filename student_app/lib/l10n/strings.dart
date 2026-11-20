@@ -75,7 +75,7 @@ class Strings {
     'totalDepartments': 'ټولې څانګې',
     'totalFaculties': 'ټول پوهنځي',
     'unknownAuthor': 'نامعلوم',
-    'version': 'نسخه 1.0.0+12',
+    'version': 'نسخه 1.0.0+13',
     'noBooksNote':
         'د دې څانګې کتابونه لا په eCampus کې نشته؛ کتابونه به له پوهنتون څخه راوړل شي.',
     'pcbNote':
@@ -120,6 +120,9 @@ class Strings {
         'پر مضمون ټک کړئ — د هغه مضمون کتاب به درته راشي.',
     'tapBookToOpen':
         'د کتاب پر نوم ټک کړئ — هماغه کتاب به PDF کې پرانیستل شي.',
+    'noBookForSubject': 'د دې مضمون کتاب لا نشته.',
+    'bookComingSoon':
+        'ډېر ژر به یې زیارمل صاحب اپلوډ کړي، ان‌شاءالله.',
     'downloaded': 'ډاونلوډ شو',
     'downloading': 'ډاونلوډ کېږي…',
     'downloadFailed': 'ډاونلوډ نه شو — انټرنېټ وګورئ.',
@@ -178,7 +181,7 @@ class Strings {
     'totalDepartments': 'Total departments',
     'totalFaculties': 'Total faculties',
     'unknownAuthor': 'Unknown',
-    'version': 'Version 1.0.0+12',
+    'version': 'Version 1.0.0+13',
     'noBooksNote':
         'No books for this department on eCampus yet; books will come from the university.',
     'pcbNote':
@@ -224,6 +227,9 @@ class Strings {
         'Tap a subject — that subject\'s book will open.',
     'tapBookToOpen':
         'Tap the book name — that same book will open as a PDF.',
+    'noBookForSubject': 'This subject\'s book is not available yet.',
+    'bookComingSoon':
+        'Ziarmal Sahib will upload it very soon, inshallah.',
     'downloaded': 'Downloaded',
     'downloading': 'Downloading…',
     'downloadFailed': 'Download failed — check the internet.',

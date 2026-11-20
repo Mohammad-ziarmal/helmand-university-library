@@ -3,6 +3,18 @@
 // needed later for live updates from the Admin App.
 
 import '../data/catalogue.dart';
+import '../data/subject_books.dart';
+
+/// Only the book(s) that cover exactly this subject — matched by name
+/// against the book title (see subject_books.dart). A subject with no
+/// entry has no book yet; the app shows the 'upload soon' message.
+List<LibraryBook> booksOfSubject(
+        String departmentId, int semester, String subjectName) {
+  final ids =
+      subjectBooks['$departmentId|$semester|$subjectName'] ?? const <String>[];
+  final byId = {for (final b in libraryBooks) b.id: b};
+  return [for (final id in ids) if (byId[id] != null) byId[id]!];
+}
 
 List<Department> departmentsOfFaculty(String facultyId) =>
     departments.where((d) => d.facultyId == facultyId).toList();
