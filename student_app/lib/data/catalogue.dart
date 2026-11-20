@@ -1785,6 +1785,8 @@ const libraryBooks = <LibraryBook>[
   LibraryBook(id: 'b169', title: "Malaria", author: "Dr. Mohammad-Es-haq-Sharifi", departmentIds: ["general-vet"], semestersByDepartment: const {"general-vet": [5, 6, 7, 8, 9]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/09/Malaria-Dr-Mohammad-Es-haq-Sharifi.pdf", viaPcbPage: false),
   LibraryBook(id: 'b170', title: "Nutrition and Health", author: "Dr. M. Haroon", departmentIds: ["general-vet"], semestersByDepartment: const {"general-vet": [5, 6]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/09/Nutrition-and-Health-Dr.-.M.-Haroon-.pdf", viaPcbPage: false),
   LibraryBook(id: 'b171', title: "Nutrition and Malnutrition", author: "Dr. Abdul Wahed Wasiq", departmentIds: ["general-vet"], semestersByDepartment: const {"general-vet": [5, 6]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/09/Nutrition-and-Malnutrition-Dr.-Abdul-Wahed-Wasiq.pdf", viaPcbPage: false),
+  LibraryBook(id: 'b172', title: "عمومي ریاضي ۱", author: "هلمند پوهنتون", departmentIds: ["math"], semestersByDepartment: const {"math": [1]}, pdfUrl: "https://raw.githubusercontent.com/Mohammad-ziarmal/helmand-university-library/main/books/general-mathematics-1.pdf", viaPcbPage: false),
+  LibraryBook(id: 'b173', title: "وترنری زولوژی", author: "Gulalai Samandar", departmentIds: ["general-vet"], semestersByDepartment: const {"general-vet": [1]}, pdfUrl: "https://raw.githubusercontent.com/Mohammad-ziarmal/helmand-university-library/main/books/veterinary-zoology.pdf", viaPcbPage: false),
 ];
 
 /// Pashto literary books for the Reading Library.
