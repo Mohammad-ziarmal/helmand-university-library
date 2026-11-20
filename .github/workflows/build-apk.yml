@@ -100,9 +100,14 @@ jobs:
         run: flutter pub get
         working-directory: ${{ matrix.app }}
 
+      # Smaller APK (~32 MB, not ~53 MB): build only the two
+      # architectures real phones use (arm + arm64). Flutter
+      # ignores the ndk abiFilters in build.gradle, so the
+      # --target-platform flag here is what actually drops x86_64.
       - name: Build release APK
         run: >
           flutter build apk --release
+          --target-platform android-arm,android-arm64
           --dart-define=SUPABASE_URL=${{ secrets.SUPABASE_URL }}
           --dart-define=SUPABASE_ANON_KEY=${{ secrets.SUPABASE_ANON_KEY }}
         working-directory: ${{ matrix.app }}
