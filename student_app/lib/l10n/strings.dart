@@ -75,7 +75,7 @@ class Strings {
     'totalDepartments': 'ټولې څانګې',
     'totalFaculties': 'ټول پوهنځي',
     'unknownAuthor': 'نامعلوم',
-    'version': 'نسخه 1.0.0+3',
+    'version': 'نسخه 1.0.0+11',
     'noBooksNote':
         'د دې څانګې کتابونه لا په eCampus کې نشته؛ کتابونه به له پوهنتون څخه راوړل شي.',
     'pcbNote':
@@ -116,6 +116,16 @@ class Strings {
     'share': 'شریکول',
     'internetRequired':
         'د اکونټ جوړولو لپاره انټرنیت فعال کړئ — بغیر له انټرنیټ څخه اکونټ نه جوړېږي.',
+    'tapSubjectToOpenBook':
+        'پر مضمون ټک کړئ — د هغه مضمون کتاب به درته راشي.',
+    'tapBookToOpen':
+        'د کتاب پر نوم ټک کړئ — هماغه کتاب به PDF کې پرانیستل شي.',
+    'downloaded': 'ډاونلوډ شو',
+    'downloading': 'ډاونلوډ کېږي…',
+    'downloadFailed': 'ډاونلوډ نه شو — انټرنېټ وګورئ.',
+    'readOffline': 'بې انټرنېټه ولولئ',
+    'savedOnPhone':
+        'په موبایل کې خوندي شو — بیا یې بې انټرنېټه هم لوستلی شئ.',
   };
 
   static const Map<String, String> en = {
@@ -168,7 +178,7 @@ class Strings {
     'totalDepartments': 'Total departments',
     'totalFaculties': 'Total faculties',
     'unknownAuthor': 'Unknown',
-    'version': 'Version 1.0.0+3',
+    'version': 'Version 1.0.0+11',
     'noBooksNote':
         'No books for this department on eCampus yet; books will come from the university.',
     'pcbNote':
@@ -210,5 +220,15 @@ class Strings {
     'share': 'Share',
     'internetRequired':
         'Turn on the internet to create an account — an account cannot be created without internet.',
+    'tapSubjectToOpenBook':
+        'Tap a subject — that subject\'s book will open.',
+    'tapBookToOpen':
+        'Tap the book name — that same book will open as a PDF.',
+    'downloaded': 'Downloaded',
+    'downloading': 'Downloading…',
+    'downloadFailed': 'Download failed — check the internet.',
+    'readOffline': 'Read offline',
+    'savedOnPhone':
+        'Saved on the phone — you can read it again without internet.',
   };
 }

@@ -1,4 +1,9 @@
 // Shared book card + PDF opening helpers used by several screens.
+//
+// Tapping the book NAME opens that book's PDF directly.
+// "Read" opens the PDF (from the phone when it was downloaded, so it
+// works without internet). "Download" saves the PDF on the phone, so
+// the student can read it again later, offline.
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -7,32 +12,73 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../data/catalogue.dart';
 import '../l10n/strings.dart';
+import '../services/downloaded_books.dart';
 import '../services/store.dart';
 
-/// Open a book PDF. "Read" opens it in an in-app browser view;
-/// "Download" opens it in the external browser / PDF viewer so the
-/// student can save it on the phone.
+/// Card colours the user asked for: red, yellow, blue, brown, green.
+/// One pair per colour, cycled by book id so neighbouring cards differ.
+const List<(Color, Color, Color)> bookCoverColours = [
+  (Color(0xFFC62828), Color(0xFFEF5350), Colors.white),
+  (Color(0xFFF9A825), Color(0xFFFFCA28), Color(0xFF3E2723)),
+  (Color(0xFF1565C0), Color(0xFF29B6F6), Colors.white),
+  (Color(0xFF6D4C41), Color(0xFFA1887F), Colors.white),
+  (Color(0xFF2E7D32), Color(0xFF66BB6A), Colors.white),
+];
+
+(Color, Color, Color) coverColourFor(String id) {
+  var h = 0;
+  for (var i = 0; i < id.length; i++) {
+    h = (h * 31 + id.codeUnitAt(i)) & 0x7fffffff;
+  }
+  return bookCoverColours[h % bookCoverColours.length];
+}
+
+void _showMessage(BuildContext context, String key) {
+  if (!context.mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(tr(context, key))),
+  );
+}
+
+/// Open a book PDF. When the book was downloaded before, the saved
+/// file on the phone opens — even without internet.
 Future<void> openBookPdf(
   BuildContext context,
   LibraryBook book, {
   required bool download,
 }) async {
-  final uri = Uri.parse(book.pdfUrl);
-  final ok = await launchUrl(
-    uri,
-    mode: download
-        ? LaunchMode.externalApplication
-        : LaunchMode.inAppBrowserView,
-  );
-  if (!ok && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          Strings.t('openError', context.read<AppState>().isPashto),
-        ),
-      ),
-    );
+  if (download) {
+    if (book.viaPcbPage) {
+      // This entry points at a web page, not a PDF file.
+      await launchUrl(Uri.parse(book.pdfUrl),
+          mode: LaunchMode.externalApplication);
+      return;
+    }
+    final path = await DownloadedBooks.download(book.id, book.pdfUrl);
+    if (!context.mounted) return;
+    if (path != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(tr(context, 'savedOnPhone'))),
+      );
+    } else {
+      _showMessage(context, 'downloadFailed');
+    }
+    return;
   }
+  final local = await DownloadedBooks.localPath(book.id);
+  if (local != null) {
+    final ok = await launchUrl(
+      Uri.file(local),
+      mode: LaunchMode.externalApplication,
+    );
+    if (ok) return;
+    // The phone had no PDF viewer for the file: fall through to online.
+  }
+  final ok = await launchUrl(
+    Uri.parse(book.pdfUrl),
+    mode: LaunchMode.inAppBrowserView,
+  );
+  if (!ok) _showMessage(context, 'openError');
 }
 
 Future<void> openReadingPdf(
@@ -40,22 +86,31 @@ Future<void> openReadingPdf(
   ReadingBook book, {
   required bool download,
 }) async {
-  final uri = Uri.parse(book.pdfUrl);
-  final ok = await launchUrl(
-    uri,
-    mode: download
-        ? LaunchMode.externalApplication
-        : LaunchMode.inAppBrowserView,
-  );
-  if (!ok && context.mounted) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          Strings.t('openError', context.read<AppState>().isPashto),
-        ),
-      ),
-    );
+  if (download) {
+    final path = await DownloadedBooks.download(book.id, book.pdfUrl);
+    if (!context.mounted) return;
+    if (path != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(tr(context, 'savedOnPhone'))),
+      );
+    } else {
+      _showMessage(context, 'downloadFailed');
+    }
+    return;
   }
+  final local = await DownloadedBooks.localPath(book.id);
+  if (local != null) {
+    final ok = await launchUrl(
+      Uri.file(local),
+      mode: LaunchMode.externalApplication,
+    );
+    if (ok) return;
+  }
+  final ok = await launchUrl(
+    Uri.parse(book.pdfUrl),
+    mode: LaunchMode.inAppBrowserView,
+  );
+  if (!ok) _showMessage(context, 'openError');
 }
 
 /// Share a book (title, author, PDF link) with the system share sheet,
@@ -71,15 +126,44 @@ Future<void> shareBookLink(
   await SharePlus.instance.share(ShareParams(text: text, subject: title));
 }
 
-class BookTile extends StatelessWidget {
+class BookTile extends StatefulWidget {
   const BookTile({super.key, required this.book});
 
   final LibraryBook book;
 
   @override
+  State<BookTile> createState() => _BookTileState();
+}
+
+class _BookTileState extends State<BookTile> {
+  bool _downloaded = false;
+  bool _downloading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _refreshDownloaded();
+  }
+
+  Future<void> _refreshDownloaded() async {
+    final value = await DownloadedBooks.isDownloaded(widget.book.id);
+    if (mounted) setState(() => _downloaded = value);
+  }
+
+  Future<void> _onDownload() async {
+    if (_downloading) return;
+    setState(() => _downloading = true);
+    await openBookPdf(context, widget.book, download: true);
+    await _refreshDownloaded();
+    if (mounted) setState(() => _downloading = false);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final state = context.watch<AppState>();
-    final isFav = state.isFavorite(book.id);
+    final isFav = state.isFavorite(widget.book.id);
+    final book = widget.book;
+    final cover = coverColourFor(book.id);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       child: Padding(
@@ -94,23 +178,23 @@ class BookTile extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    gradient: const LinearGradient(
+                    gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
-                      colors: [Color(0xFF1565C0), Color(0xFF29B6F6)],
+                      colors: [cover.$1, cover.$2],
                     ),
                     borderRadius: BorderRadius.circular(14),
                     boxShadow: [
                       BoxShadow(
-                        color: Color(0xFF1565C0).withOpacity(0.35),
+                        color: cover.$1.withOpacity(0.35),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.menu_book,
-                    color: Colors.white,
+                    color: cover.$3,
                     size: 26,
                   ),
                 ),
@@ -119,18 +203,46 @@ class BookTile extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        book.title,
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.bold),
+                      // Tapping the book name opens its PDF directly.
+                      InkWell(
+                        onTap: () =>
+                            openBookPdf(context, book, download: false),
+                        child: Text(
+                          book.title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '${tr(context, 'author')}: ${book.author}',
                         style: Theme.of(context).textTheme.bodySmall,
                       ),
+                      if (_downloaded) ...[
+                        const SizedBox(height: 4),
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.check_circle,
+                              size: 14,
+                              color: Color(0xFF2E7D32),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              tr(context, 'downloaded'),
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodySmall
+                                  ?.copyWith(
+                                    color: const Color(0xFF2E7D32),
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                            ),
+                          ],
+                        ),
+                      ],
                       if (book.viaPcbPage) ...[
                         const SizedBox(height: 4),
                         Text(
@@ -177,16 +289,35 @@ class BookTile extends StatelessWidget {
                     onPressed: () =>
                         openBookPdf(context, book, download: false),
                     icon: const Icon(Icons.visibility),
-                    label: Text(tr(context, 'read')),
+                    label: Text(
+                      _downloaded
+                          ? tr(context, 'readOffline')
+                          : tr(context, 'read'),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),
                 Expanded(
                   child: OutlinedButton.icon(
-                    onPressed: () =>
-                        openBookPdf(context, book, download: true),
-                    icon: const Icon(Icons.download),
-                    label: Text(tr(context, 'download')),
+                    onPressed: _downloading ? null : _onDownload,
+                    icon: _downloading
+                        ? const SizedBox(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : Icon(
+                            _downloaded
+                                ? Icons.check_circle
+                                : Icons.download,
+                          ),
+                    label: Text(
+                      _downloading
+                          ? tr(context, 'downloading')
+                          : _downloaded
+                              ? tr(context, 'downloaded')
+                              : tr(context, 'download'),
+                    ),
                   ),
                 ),
               ],

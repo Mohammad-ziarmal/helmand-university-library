@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import '../data/catalogue.dart';
 import '../l10n/strings.dart';
 import 'book_tile.dart';
+import 'library_screens.dart';
 
 class ReadingLibraryScreen extends StatefulWidget {
   const ReadingLibraryScreen({super.key});
@@ -96,11 +97,11 @@ class _ReadingLibraryScreenState extends State<ReadingLibraryScreen> {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const CircleAvatar(
-                            backgroundColor: Color(0xFF00796B),
+                          CircleAvatar(
+                            backgroundColor: coverColourFor(book.id).$1,
                             child: Icon(
                               Icons.auto_stories,
-                              color: Colors.white,
+                              color: coverColourFor(book.id).$3,
                             ),
                           ),
                           const SizedBox(width: 12),
@@ -108,12 +109,19 @@ class _ReadingLibraryScreenState extends State<ReadingLibraryScreen> {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  book.title,
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .titleMedium
-                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                InkWell(
+                                  onTap: () => openReadingPdf(
+                                    context,
+                                    book,
+                                    download: false,
+                                  ),
+                                  child: Text(
+                                    book.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(fontWeight: FontWeight.bold),
+                                  ),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(

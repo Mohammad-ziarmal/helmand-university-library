@@ -44,6 +44,13 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode.toInteger()
         versionName = flutterVersionName
+        // Smaller APK (~32 MB instead of ~53 MB): ship only the two
+        // architectures real phones use (arm64 + armv7). The x86_64
+        // build (emulators / very few phones) is dropped. The 53 MB
+        // build stays available in git history if ever needed.
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+        }
     }
 
     // Release signing: the keystore and its passwords come from

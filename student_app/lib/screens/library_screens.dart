@@ -1,6 +1,11 @@
 // University Library flow:
-// Faculties -> Departments -> Semesters -> Subjects + Books.
-// Departments with no eCampus book show a note instead of an empty list.
+// Faculties -> Departments -> Semesters -> Subjects.
+// Tapping a subject opens THAT subject's books (the books of its
+// semester). The books are NOT listed below the subjects any more.
+// Tapping a book name opens that book's PDF directly.
+//
+// Card colours (the user's choice): red, yellow, blue, brown, green,
+// cycled across the cards so neighbouring cards differ.
 
 import 'package:flutter/material.dart';
 
@@ -8,6 +13,22 @@ import '../data/catalogue.dart';
 import '../data/catalogue_helpers.dart';
 import '../l10n/strings.dart';
 import 'book_tile.dart';
+
+/// Red, yellow, blue, brown, green.
+const List<Color> cardPalette = [
+  Color(0xFFC62828),
+  Color(0xFFF9A825),
+  Color(0xFF1565C0),
+  Color(0xFF6D4C41),
+  Color(0xFF2E7D32),
+];
+
+/// White text/icon on every palette colour except yellow, where dark
+/// text reads better.
+Color paletteOnColor(Color color) =>
+    color == const Color(0xFFF9A825) ? const Color(0xFF3E2723) : Colors.white;
+
+Color paletteFor(int index) => cardPalette[index % cardPalette.length];
 
 class FacultiesScreen extends StatelessWidget {
   const FacultiesScreen({super.key});
@@ -21,12 +42,13 @@ class FacultiesScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final faculty = faculties[index];
           final count = departmentsOfFaculty(faculty.id).length;
+          final color = paletteFor(index);
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFF1565C0),
-                child: Icon(Icons.school, color: Colors.white),
+              leading: CircleAvatar(
+                backgroundColor: color,
+                child: Icon(Icons.school, color: paletteOnColor(color)),
               ),
               title: Text(
                 context.watchAppStateIsPashto()
@@ -70,12 +92,14 @@ class DepartmentsScreen extends StatelessWidget {
         itemCount: list.length,
         itemBuilder: (context, index) {
           final dept = list[index];
+          final color = paletteFor(index);
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
-              leading: const CircleAvatar(
-                backgroundColor: Color(0xFF00796B),
-                child: Icon(Icons.account_balance, color: Colors.white),
+              leading: CircleAvatar(
+                backgroundColor: color,
+                child:
+                    Icon(Icons.account_balance, color: paletteOnColor(color)),
               ),
               title: Text(
                 isPs ? dept.namePs : dept.nameEn,
@@ -133,15 +157,16 @@ class SemestersScreen extends StatelessWidget {
           final semester = index + 1;
           final count =
               subjectsOf(department.id, semester).length;
+          final color = paletteFor(index);
           return Card(
             margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             child: ListTile(
               leading: CircleAvatar(
-                backgroundColor: const Color(0xFFC9A227),
+                backgroundColor: color,
                 child: Text(
                   '$semester',
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: paletteOnColor(color),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -170,7 +195,8 @@ class SemestersScreen extends StatelessWidget {
   }
 }
 
-/// One semester: its subjects, then the department's real books.
+/// One semester: ONLY its subjects. No books are listed below them.
+/// Tap a subject to open its books.
 class SemesterScreen extends StatelessWidget {
   const SemesterScreen({
     super.key,
@@ -185,12 +211,6 @@ class SemesterScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final isPs = context.watchAppStateIsPashto();
     final subjectList = subjectsOf(department.id, semester);
-    // Only this semester's own subjects' books. Semester 0 is the
-    // Islamic Culture service department: it has no semesters, so its
-    // general books still come from the whole department.
-    final books = semester == 0
-        ? booksOfDepartment(department.id)
-        : booksOfSemester(department.id, semester);
     final title = semester == 0
         ? tr(context, 'generalSubjects')
         : '${tr(context, 'semester')} $semester';
@@ -210,34 +230,112 @@ class SemesterScreen extends StatelessWidget {
               style: Theme.of(context).textTheme.titleLarge,
             ),
           ),
-          ...subjectList.map(
-            (s) => Card(
-              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              child: ListTile(
-                leading:
-                    const Icon(Icons.book_outlined, color: Color(0xFF1565C0)),
-                title: Text(
-                  s.name,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                ),
-                subtitle: s.code.isEmpty
-                    ? null
-                    : Text('${tr(context, 'code')}: ${s.code}'),
-                trailing: Chip(
-                  label: Text(
-                    '${s.credits} ${tr(context, 'credits')}',
-                  ),
-                ),
-              ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              tr(context, 'tapSubjectToOpenBook'),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
+          ...subjectList.asMap().entries.map(
+            (entry) {
+              final index = entry.key;
+              final s = entry.value;
+              final color = paletteFor(index);
+              return Card(
+                margin:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: color,
+                    child: Icon(
+                      Icons.menu_book,
+                      color: paletteOnColor(color),
+                    ),
+                  ),
+                  title: Text(
+                    s.name,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                  subtitle: s.code.isEmpty
+                      ? null
+                      : Text('${tr(context, 'code')}: ${s.code}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Chip(
+                        label: Text(
+                          '${s.credits} ${tr(context, 'credits')}',
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.arrow_forward_ios, size: 16),
+                    ],
+                  ),
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => SubjectBooksScreen(
+                        department: department,
+                        semester: semester,
+                        subject: s,
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The books of one subject: the books of its semester.
+/// Tapping a book name opens that book's PDF directly (see BookTile).
+class SubjectBooksScreen extends StatelessWidget {
+  const SubjectBooksScreen({
+    super.key,
+    required this.department,
+    required this.semester,
+    required this.subject,
+  });
+
+  final Department department;
+  final int semester;
+  final Subject subject;
+
+  @override
+  Widget build(BuildContext context) {
+    final isPs = context.watchAppStateIsPashto();
+    // Only this semester's own books. Semester 0 is the Islamic
+    // Culture service department: it has no semesters, so its general
+    // books still come from the whole department.
+    final books = semester == 0
+        ? booksOfDepartment(department.id)
+        : booksOfSemester(department.id, semester);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(subject.name),
+      ),
+      body: ListView(
+        padding: const EdgeInsets.only(bottom: 24),
+        children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
             child: Text(
-              tr(context, 'books'),
-              style: Theme.of(context).textTheme.titleLarge,
+              '${isPs ? department.namePs : department.nameEn}'
+              '${semester == 0 ? '' : ' — ${tr(context, 'semester')} $semester'}',
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+            child: Text(
+              tr(context, 'tapBookToOpen'),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           if (books.isEmpty)
