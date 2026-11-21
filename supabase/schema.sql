@@ -5,7 +5,7 @@
 -- It is safe to run twice: tables are created IF NOT EXISTS and
 -- the seed data uses ON CONFLICT DO NOTHING.
 --
--- Structure: 6 faculties, 19 departments (verified against
+-- Structure: 7 faculties, 21 departments (verified against
 -- helu.edu.af and the university catalogs, 1404).
 -- The student app also carries this catalogue bundled in its code
 -- (lib/data/catalogue.dart), so it works offline even before this
@@ -178,7 +178,7 @@ create table if not exists settings (
 
 -- ----------------------------------------------------------
 -- Seed data: roles, academic years, faculties, departments.
--- Verified structure: 6 faculties, 19 departments.
+-- Verified structure: 7 faculties, 21 departments.
 -- ----------------------------------------------------------
 insert into roles (name, description) values
   ('super_admin', 'Mohammad Ziarmal - full control'),
@@ -198,7 +198,8 @@ insert into faculties (id, name_ps, name_en, sort_order) values
   ('33333333-3333-3333-3333-333333333333', 'انجینري', 'Engineering', 3),
   ('44444444-4444-4444-4444-444444444444', 'وترنري علومو', 'Veterinary Sciences', 4),
   ('55555555-5555-5555-5555-555555555555', 'اقتصاد', 'Economics', 5),
-  ('66666666-6666-6666-6666-666666666666', 'شرعیاتو', 'Shariah', 6)
+  ('66666666-6666-6666-6666-666666666666', 'شرعیاتو', 'Shariah', 6),
+  ('77777777-7777-7777-7777-777777777777', 'کمپیوټر ساینس', 'Computer Science', 7)
 on conflict (id) do nothing;
 
 insert into departments (faculty_id, name_ps, name_en, semesters, sort_order) values
@@ -220,7 +221,9 @@ insert into departments (faculty_id, name_ps, name_en, semesters, sort_order) va
   ('55555555-5555-5555-5555-555555555555', 'اداره او تجارت', 'Administration & Business', 8, 2),
   ('66666666-6666-6666-6666-666666666666', 'اسلامي تعلیمات', 'Islamic Teachings', 8, 1),
   ('66666666-6666-6666-6666-666666666666', 'فقه او قانون', 'Fiqh & Law', 8, 2),
-  ('66666666-6666-6666-6666-666666666666', 'اسلامي ثقافت', 'Islamic Culture', 0, 3)
+  ('66666666-6666-6666-6666-666666666666', 'اسلامي ثقافت', 'Islamic Culture', 0, 3),
+  ('77777777-7777-7777-7777-777777777777', 'معلوماتي سیستمونه', 'Information Systems', 8, 1),
+  ('77777777-7777-7777-7777-777777777777', 'معلوماتي ټکنالوژي', 'Information Technology', 8, 2)
 on conflict do nothing;
 
 -- ----------------------------------------------------------

@@ -5,7 +5,7 @@
 //   ecampus-books.md (real eCampus books, free PDF links).
 // To update the data, edit the source files and re-run the generator.
 // Model classes live in lib/models/book.dart.
-// 6 faculties, 19 departments. Only books with a real eCampus link
+// 7 faculties, 21 departments. Only books with a real eCampus link
 // are listed; departments with no eCampus book show a note in the app.
 
 import '../models/book.dart';
@@ -18,6 +18,7 @@ const faculties = <Faculty>[
   Faculty(id: "vet", namePs: "وترنري علومو", nameEn: "Veterinary Sciences"),
   Faculty(id: "econ", namePs: "اقتصاد", nameEn: "Economics"),
   Faculty(id: "shar", namePs: "شرعیاتو", nameEn: "Shariah"),
+  Faculty(id: "cs", namePs: "کمپیوټر ساینس", nameEn: "Computer Science"),
 ];
 
 const departments = <Department>[
@@ -40,6 +41,8 @@ const departments = <Department>[
   Department(id: "islamic-teachings", facultyId: "shar", namePs: "اسلامي تعلیمات", nameEn: "Islamic Teachings", semesters: 8, isService: false, hasBooks: false),
   Department(id: "fiqh-law", facultyId: "shar", namePs: "فقه او قانون", nameEn: "Fiqh & Law", semesters: 8, isService: false, hasBooks: false),
   Department(id: "islamic-culture", facultyId: "shar", namePs: "اسلامي ثقافت", nameEn: "Islamic Culture", semesters: 0, isService: true, hasBooks: false),
+  Department(id: "info-systems", facultyId: "cs", namePs: "معلوماتي سیستمونه", nameEn: "Information Systems", semesters: 8, isService: false, hasBooks: true),
+  Department(id: "info-tech", facultyId: "cs", namePs: "معلوماتي ټکنالوژي", nameEn: "Information Technology", semesters: 8, isService: false, hasBooks: true),
 ];
 
 /// Semester subjects: department id -> semester number -> subjects.
@@ -1789,8 +1792,8 @@ const libraryBooks = <LibraryBook>[
   LibraryBook(id: 'b233', title: "Psychology & Its Need in Afghanistan", author: "Dr. Azam Dadfar", departmentIds: ["bio", "chem", "math", "pashto", "physics"], semestersByDepartment: const {"bio": [1, 2, 3, 8], "chem": [1, 2, 3], "math": [1, 2, 3], "pashto": [1, 2, 3], "physics": [1, 2]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/10/Psychology-its-need-in-Afghanistan-Dr-Azam-Dadfar.pdf", viaPcbPage: false),
   LibraryBook(id: 'b234', title: "Behavioral Science", author: "Dr. Jahan Shah Tanai", departmentIds: ["bio", "chem", "math", "pashto", "physics"], semestersByDepartment: const {"bio": [1, 2, 3, 8], "chem": [1, 2, 3], "math": [1, 2, 3], "pashto": [1, 2, 3], "physics": [1, 2]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/09/Behavioral-Science-Dr-Jahansha-tanay.pdf", viaPcbPage: false),
   LibraryBook(id: 'b235', title: "Practical Guide to Mental Health Problems", author: "Sian Nicholas", departmentIds: ["bio", "chem", "math", "pashto", "physics"], semestersByDepartment: const {"bio": [1, 2, 3, 8], "chem": [1, 2, 3], "math": [1, 2, 3], "pashto": [1, 2, 3], "physics": [1, 2]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/09/Practical-Guide-to-Mental-Health-problems-Sian-Nicholas.pdf", viaPcbPage: false),
-  LibraryBook(id: 'b236', title: "Computer Architecture and Assembly Language", author: "Prof. Badam Niazai", departmentIds: ["ag-econ", "agronomy", "animal-sci", "bio", "business", "chem", "civil", "electricity", "english", "finance", "horticulture", "islamic-teachings", "math", "pashto", "physics", "water"], semestersByDepartment: const {"ag-econ": [1, 2], "agronomy": [1, 2], "animal-sci": [1], "bio": [1, 2], "business": [7], "chem": [1, 2], "civil": [2], "electricity": [2, 8], "english": [1], "finance": [7], "horticulture": [1, 2], "islamic-teachings": [4], "math": [1], "pashto": [1], "physics": [1, 5], "water": [2]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2024/03/2023-9-7-Computer-architecture-and-assembly-language.pdf", viaPcbPage: false),
-  LibraryBook(id: 'b237', title: "Fundamental of Database", author: "Teach. Assist. Zargay Habibi (2023; ISBN 978-9936-622-54-8; English; 6 chapters)", departmentIds: ["ag-econ", "agronomy", "animal-sci", "bio", "business", "chem", "civil", "electricity", "english", "finance", "horticulture", "islamic-teachings", "math", "pashto", "physics", "water"], semestersByDepartment: const {"ag-econ": [1, 2], "agronomy": [1, 2], "animal-sci": [1], "bio": [1, 2], "business": [7], "chem": [1, 2], "civil": [2], "electricity": [2, 8], "english": [1], "finance": [7], "horticulture": [1, 2], "islamic-teachings": [4], "math": [1], "pashto": [1], "physics": [1, 5], "water": [2]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2024/03/2023-9-7-Fundamental-of-Database-Complete.pdf", viaPcbPage: false),
+  LibraryBook(id: 'b236', title: "Computer Architecture and Assembly Language", author: "Prof. Badam Niazai", departmentIds: ["ag-econ", "agronomy", "animal-sci", "bio", "business", "chem", "civil", "electricity", "english", "finance", "horticulture", "info-systems", "info-tech", "islamic-teachings", "math", "pashto", "physics", "water"], semestersByDepartment: const {"ag-econ": [1, 2], "agronomy": [1, 2], "animal-sci": [1], "bio": [1, 2], "business": [7], "chem": [1, 2], "civil": [2], "electricity": [2, 8], "english": [1], "finance": [7], "horticulture": [1, 2], "islamic-teachings": [4], "math": [1], "pashto": [1], "physics": [1, 5], "water": [2]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2024/03/2023-9-7-Computer-architecture-and-assembly-language.pdf", viaPcbPage: false),
+  LibraryBook(id: 'b237', title: "Fundamental of Database", author: "Teach. Assist. Zargay Habibi (2023; ISBN 978-9936-622-54-8; English; 6 chapters)", departmentIds: ["ag-econ", "agronomy", "animal-sci", "bio", "business", "chem", "civil", "electricity", "english", "finance", "horticulture", "info-systems", "info-tech", "islamic-teachings", "math", "pashto", "physics", "water"], semestersByDepartment: const {"ag-econ": [1, 2], "agronomy": [1, 2], "animal-sci": [1], "bio": [1, 2], "business": [7], "chem": [1, 2], "civil": [2], "electricity": [2, 8], "english": [1], "finance": [7], "horticulture": [1, 2], "islamic-teachings": [4], "math": [1], "pashto": [1], "physics": [1, 5], "water": [2]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2024/03/2023-9-7-Fundamental-of-Database-Complete.pdf", viaPcbPage: false),
   LibraryBook(id: 'b238', title: "Waste Water Engineering", author: "Eng. Zalmay Khaliqi", departmentIds: ["civil", "water"], semestersByDepartment: const {"civil": [7, 8], "water": [6, 7]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/10/Waste-Water-Engineering-Eng-Zalmay-Khaliqi.pdf", viaPcbPage: false),
   LibraryBook(id: 'b239', title: "Water Supply Engineering", author: "Eng. Mohammad Esa Tanha", departmentIds: ["civil", "water"], semestersByDepartment: const {"civil": [7, 8], "water": [7]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2021/10/Water-supply-Engineering-Eng-Mohammad-Esa-Tanha.pdf", viaPcbPage: false),
   LibraryBook(id: 'b240', title: "Irrigation Engineering", author: "Dpl. Eng. Asghar Ghaforzai", departmentIds: ["agronomy"], semestersByDepartment: const {"agronomy": [7]}, pdfUrl: "https://ecampus-afghanistan.org/wp-content/uploads/2022/05/Irrigation-Engineering-Dpl-Eng-Asghar-Ghaforzai.pdf", viaPcbPage: false),
