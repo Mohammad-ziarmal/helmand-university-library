@@ -116,13 +116,24 @@ class _ReadingLibraryScreenState extends State<ReadingLibraryScreen> {
                                     download: false,
                                   ),
                                   child: Text(
-                                    book.title,
+                                    book.titlePs ?? book.title,
                                     style: Theme.of(context)
                                         .textTheme
                                         .titleMedium
                                         ?.copyWith(fontWeight: FontWeight.bold),
                                   ),
                                 ),
+                                if (book.titlePs != null &&
+                                    book.titlePs != book.title) ...[
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    book.title,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .bodySmall
+                                        ?.copyWith(color: Colors.grey),
+                                  ),
+                                ],
                                 const SizedBox(height: 4),
                                 Text(
                                   '${tr(context, 'author')}: ${book.author}',
@@ -141,7 +152,7 @@ class _ReadingLibraryScreenState extends State<ReadingLibraryScreen> {
                             icon: const Icon(Icons.share),
                             onPressed: () => shareBookLink(
                               context,
-                              title: book.title,
+                              title: book.titlePs ?? book.title,
                               author: book.author,
                               pdfUrl: book.pdfUrl,
                             ),

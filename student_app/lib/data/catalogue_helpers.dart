@@ -58,6 +58,7 @@ List<LibraryBook> searchBooks(String query) {
   return libraryBooks
       .where((b) =>
           b.title.toLowerCase().contains(q) ||
+          b.titlePs.toLowerCase().contains(q) ||
           b.author.toLowerCase().contains(q))
       .toList();
 }

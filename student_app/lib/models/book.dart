@@ -32,6 +32,8 @@ class Subject {
 class LibraryBook {
   final String id;
   final String title;
+  /// Pashto title, shown as the main title in the app.
+  final String titlePs;
   final String author;
   final List<String> departmentIds;
   /// Which semesters of each department teach the subject this book
@@ -43,7 +45,7 @@ class LibraryBook {
   /// True when the book is found through the eCampus PCB textbooks page
   /// rather than a direct PDF link.
   final bool viaPcbPage;
-  const LibraryBook({required this.id, required this.title, required this.author,
+  const LibraryBook({required this.id, required this.title, required this.titlePs, required this.author,
     required this.departmentIds, required this.semestersByDepartment,
     required this.pdfUrl, required this.viaPcbPage});
 }
@@ -51,9 +53,12 @@ class LibraryBook {
 class ReadingBook {
   final String id;
   final String title;
+  /// Pashto title when the book's own title is English (e.g. Aesop).
+  /// Null when the title itself is already Pashto.
+  final String? titlePs;
   final String author;
   final String category;
   final String pdfUrl;
-  const ReadingBook({required this.id, required this.title, required this.author,
-    required this.category, required this.pdfUrl});
+  const ReadingBook({required this.id, required this.title, this.titlePs,
+    required this.author, required this.category, required this.pdfUrl});
 }

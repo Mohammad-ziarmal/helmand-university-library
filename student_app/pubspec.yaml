@@ -1,7 +1,7 @@
 name: student_app
 description: "Helmand University Digital Library - Student App"
 publish_to: "none"
-version: 1.0.0+15
+version: 1.0.0+16
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
@@ -23,6 +23,9 @@ dependencies:
   file_picker: ^12.0.0
   path_provider: ^2.1.2
   crypto: ^3.0.3
+  # In-app PDF reader: a book opens inside the app, from the file saved
+  # on the phone — no external PDF viewer, no browser.
+  flutter_pdfview: ^1.4.1
   # Supabase is OPTIONAL for the student app. The app works fully offline
   # from the bundled catalogue (lib/data/catalogue.dart). Supabase is only
   # used later, when the backend is connected. Keys are never in this code:

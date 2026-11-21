@@ -14,6 +14,7 @@ import '../data/catalogue.dart';
 import '../l10n/strings.dart';
 import '../services/downloaded_books.dart';
 import '../services/store.dart';
+import 'pdf_reader_screen.dart';
 
 /// Card colours the user asked for: red, yellow, blue, brown, green.
 /// One pair per colour, cycled by book id so neighbouring cards differ.
@@ -40,8 +41,10 @@ void _showMessage(BuildContext context, String key) {
   );
 }
 
-/// Open a book PDF. When the book was downloaded before, the saved
-/// file on the phone opens — even without internet.
+/// Open a book PDF INSIDE the app (Build 33): the in-app reader opens
+/// the file saved on the phone — even without internet — and downloads
+/// it first when it was never downloaded. Only a web-page entry
+/// (viaPcbPage) still opens in the external browser.
 Future<void> openBookPdf(
   BuildContext context,
   LibraryBook book, {
@@ -65,20 +68,22 @@ Future<void> openBookPdf(
     }
     return;
   }
-  final local = await DownloadedBooks.localPath(book.id);
-  if (local != null) {
-    final ok = await launchUrl(
-      Uri.file(local),
-      mode: LaunchMode.externalApplication,
-    );
-    if (ok) return;
-    // The phone had no PDF viewer for the file: fall through to online.
+  if (book.viaPcbPage) {
+    final ok = await launchUrl(Uri.parse(book.pdfUrl),
+        mode: LaunchMode.externalApplication);
+    if (!ok) _showMessage(context, 'openError');
+    return;
   }
-  final ok = await launchUrl(
-    Uri.parse(book.pdfUrl),
-    mode: LaunchMode.inAppBrowserView,
+  if (!context.mounted) return;
+  await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => PdfReaderScreen(
+        bookId: book.id,
+        displayTitle: book.titlePs,
+        pdfUrl: book.pdfUrl,
+      ),
+    ),
   );
-  if (!ok) _showMessage(context, 'openError');
 }
 
 Future<void> openReadingPdf(
@@ -98,19 +103,16 @@ Future<void> openReadingPdf(
     }
     return;
   }
-  final local = await DownloadedBooks.localPath(book.id);
-  if (local != null) {
-    final ok = await launchUrl(
-      Uri.file(local),
-      mode: LaunchMode.externalApplication,
-    );
-    if (ok) return;
-  }
-  final ok = await launchUrl(
-    Uri.parse(book.pdfUrl),
-    mode: LaunchMode.inAppBrowserView,
+  if (!context.mounted) return;
+  await Navigator.of(context).push(
+    MaterialPageRoute(
+      builder: (_) => PdfReaderScreen(
+        bookId: book.id,
+        displayTitle: book.titlePs ?? book.title,
+        pdfUrl: book.pdfUrl,
+      ),
+    ),
   );
-  if (!ok) _showMessage(context, 'openError');
 }
 
 /// Share a book (title, author, PDF link) with the system share sheet,
@@ -203,18 +205,29 @@ class _BookTileState extends State<BookTile> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Tapping the book name opens its PDF directly.
+                      // Tapping the book name opens its PDF directly,
+                      // inside the app. Pashto name first, English below.
                       InkWell(
                         onTap: () =>
                             openBookPdf(context, book, download: false),
                         child: Text(
-                          book.title,
+                          book.titlePs,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                       ),
+                      if (book.titlePs != book.title) ...[
+                        const SizedBox(height: 2),
+                        Text(
+                          book.title,
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall
+                              ?.copyWith(color: Colors.grey),
+                        ),
+                      ],
                       const SizedBox(height: 4),
                       Text(
                         '${tr(context, 'author')}: ${book.author}',
@@ -263,7 +276,7 @@ class _BookTileState extends State<BookTile> {
                       icon: const Icon(Icons.share),
                       onPressed: () => shareBookLink(
                         context,
-                        title: book.title,
+                        title: book.titlePs,
                         author: book.author,
                         pdfUrl: book.pdfUrl,
                       ),
