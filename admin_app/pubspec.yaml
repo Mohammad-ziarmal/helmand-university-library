@@ -1,7 +1,7 @@
 name: admin_app
 description: "Helmand University Digital Library - Admin App (separate, managers only)"
 publish_to: "none"
-version: 1.0.0+2
+version: 1.0.0+3
 
 environment:
   sdk: ">=3.3.0 <4.0.0"

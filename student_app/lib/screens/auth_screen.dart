@@ -16,6 +16,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../data/catalogue.dart';
 import '../l10n/strings.dart';
@@ -144,6 +145,21 @@ class _AuthScreenState extends State<AuthScreen> {
     // Saving the account logs the student in; main.dart then shows
     // the home screen automatically.
     await context.read<AppState>().setAccount(account, password);
+    // Best effort: record the registration in Supabase so the Admin
+    // App can show the student list. The local account works even if
+    // this fails (no internet, Supabase not configured, table missing).
+    // No password is ever sent — only the name, email and faculty.
+    try {
+      await Supabase.instance.client.from('students').upsert(
+        {
+          'full_name': '$firstName $surname',
+          'email': email,
+          'faculty_id': _facultyId!,
+          'department_id': _departmentId!,
+        },
+        onConflict: 'email',
+      );
+    } catch (_) {}
   }
 
   void _submitLogin() async {

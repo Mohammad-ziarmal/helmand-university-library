@@ -259,6 +259,35 @@ class SupabaseService {
     return client.storage.from('books').getPublicUrl(path);
   }
 
+  // ------------------------------------------------------------ students
+  /// Students who registered in the student app, newest first.
+  static Future<List<Map<String, dynamic>>> fetchStudents() async {
+    _requireConfigured();
+    final rows = await client
+        .from('students')
+        .select('id, full_name, email, faculty_id, department_id, created_at')
+        .order('created_at', ascending: false);
+    return (rows as List).cast<Map<String, dynamic>>();
+  }
+
+  /// All departments (for mapping a student's department id to a name).
+  static Future<List<DepartmentRow>> fetchAllDepartments() async {
+    _requireConfigured();
+    final rows = await client
+        .from('departments')
+        .select()
+        .order('sort_order', ascending: true);
+    return (rows as List)
+        .map((e) => DepartmentRow.fromMap(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  static Future<void> deleteStudent(String id) async {
+    _requireConfigured();
+    await client.from('students').delete().eq('id', id);
+    await _audit('delete', 'students', id);
+  }
+
   // -------------------------------------------------------------- stats
   static Future<Map<String, int>> fetchStats() async {
     _requireConfigured();
@@ -268,6 +297,7 @@ class SupabaseService {
       'faculties': 0,
       'departments': 0,
       'downloads': 0,
+      'students': 0,
     };
     try {
       final books = await client.from('books').select('download_count');
@@ -289,6 +319,10 @@ class SupabaseService {
     try {
       final departments = await client.from('departments').select('id');
       stats['departments'] = (departments as List).length;
+    } catch (_) {}
+    try {
+      final students = await client.from('students').select('id');
+      stats['students'] = (students as List).length;
     } catch (_) {}
     return stats;
   }

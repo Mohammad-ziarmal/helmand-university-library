@@ -8,6 +8,7 @@ import 'books_screen.dart';
 import 'manage_screen.dart';
 import 'setup_screen.dart';
 import 'stats_screen.dart';
+import 'students_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -39,6 +40,7 @@ class DashboardScreen extends StatelessWidget {
                     'faculties': 0,
                     'departments': 0,
                     'downloads': 0,
+                    'students': 0,
                   };
               return Card(
                 child: Padding(
@@ -55,11 +57,20 @@ class DashboardScreen extends StatelessWidget {
                       _Stat(label: 'پوهنځي', value: stats['faculties']!),
                       _Stat(label: 'څانګې', value: stats['departments']!),
                       _Stat(label: 'ډاونلوډونه', value: stats['downloads']!),
+                      _Stat(label: 'محصلین', value: stats['students']!),
                     ],
                   ),
                 ),
               );
             },
+          ),
+          _NavCard(
+            icon: Icons.people,
+            title: 'محصلین',
+            subtitle: 'د ثبت شویو محصلینو لېست — نوم، ایمیل، پوهنځی، څانګه',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const StudentsScreen()),
+            ),
           ),
           _NavCard(
             icon: Icons.menu_book,

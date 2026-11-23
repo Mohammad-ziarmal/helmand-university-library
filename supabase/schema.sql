@@ -176,6 +176,19 @@ create table if not exists settings (
   updated_at timestamptz default now()
 );
 
+-- Students who registered in the student app (build 35+). The student
+-- app inserts one row per registration (best effort, anon key); the
+-- Admin App lists these rows. No password is ever stored here — the
+-- account password lives only on the student's own phone.
+create table if not exists students (
+  id uuid primary key default gen_random_uuid(),
+  full_name text not null,
+  email text not null unique,
+  faculty_id text not null,
+  department_id text not null,
+  created_at timestamptz not null default now()
+);
+
 -- ----------------------------------------------------------
 -- Seed data: roles, academic years, faculties, departments.
 -- Verified structure: 7 faculties, 21 departments.
@@ -255,6 +268,7 @@ alter table notifications enable row level security;
 alter table suggestions enable row level security;
 alter table audit_logs enable row level security;
 alter table settings enable row level security;
+alter table students enable row level security;
 
 -- Helper: is the current user an active admin?
 create or replace function public.is_admin()
@@ -294,6 +308,12 @@ create policy "anyone can log a download" on downloads
 create policy "anyone can send a suggestion" on suggestions
   for insert with check (true);
 
+-- A student registration writes one row here (insert only, no reading
+-- others' rows). Upsert on the unique email so re-registering with the
+-- same email updates the row instead of failing.
+create policy "anyone can register a student" on students
+  for insert with check (true);
+
 -- Admin write policies (all tables the admin manages).
 create policy "admin write faculties" on faculties
   for all using (public.is_admin()) with check (public.is_admin());
@@ -321,6 +341,10 @@ create policy "admin read admins" on admins
   for select using (public.is_admin());
 create policy "admin read roles" on roles
   for select using (public.is_admin());
+create policy "admin read students" on students
+  for select using (public.is_admin());
+create policy "admin delete students" on students
+  for delete using (public.is_admin());
 create policy "admin write settings" on settings
   for all using (public.is_admin()) with check (public.is_admin());
 
