@@ -581,6 +581,19 @@ class SupabaseService {
       });
     } catch (_) {}
   }
+
+  /// One audit entry for a whole catalogue seed (Build 38). The
+  /// record id carries "inserted N, verified true/false".
+  static Future<void> logSeed({
+    required int inserted,
+    required bool verified,
+  }) async {
+    await _audit(
+      'seed',
+      'catalogue',
+      'inserted $inserted, verified $verified',
+    );
+  }
 }
 
 /// Login / connection state for the Admin App.

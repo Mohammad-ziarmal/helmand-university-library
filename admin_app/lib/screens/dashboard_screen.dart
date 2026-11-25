@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import '../services/supabase_service.dart';
 import 'books_screen.dart';
 import 'manage_screen.dart';
+import 'seed_screen.dart';
 import 'setup_screen.dart';
 import 'stats_screen.dart';
 import 'students_screen.dart';
@@ -65,6 +66,14 @@ class DashboardScreen extends StatelessWidget {
                 ),
               );
             },
+          ),
+          _NavCard(
+            icon: Icons.cloud_upload,
+            title: 'ډېټا پورته کړه',
+            subtitle: 'یو ځل — ټول مضمونونه او کتابونه ډیټابیس ته پورته کړئ',
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const SeedScreen()),
+            ),
           ),
           _NavCard(
             icon: Icons.people,
