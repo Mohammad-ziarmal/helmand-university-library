@@ -7,7 +7,10 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../data/catalogue_data.dart';
+import '../data/catalogue_helpers.dart';
 import 'account.dart';
+import 'catalogue_sync.dart';
 
 class AppState extends ChangeNotifier {
   AppState(this._prefs) {
@@ -21,6 +24,12 @@ class AppState extends ChangeNotifier {
     _favorites = _prefs.getStringList('favorites')?.toSet() ?? <String>{};
     _account = AccountService.load(_prefs);
     _loggedIn = AccountService.isLoggedIn(_prefs);
+    // Catalogue sync (Phase 3): the app opens on the bundled catalogue
+    // (or the cached remote one) and refreshes in the background after
+    // the first frame, so a slow or failed fetch never blocks the UI.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initCatalogue();
+    });
   }
 
   final SharedPreferences _prefs;
@@ -91,6 +100,41 @@ class AppState extends ChangeNotifier {
   }
 
   bool isFavorite(String bookId) => _favorites.contains(bookId);
+
+  // ------------------------------------------------------------ catalogue
+  /// The catalogue the screens currently show (bundled, cached remote,
+  /// or freshly synced — see data/catalogue_helpers.dart).
+  CatalogueData get catalogue => currentCatalogue;
+
+  /// True when the shown catalogue came from Supabase (live or cached).
+  bool get catalogueIsRemote => currentCatalogue.isRemote;
+
+  /// When the cached remote catalogue was saved, if there is one.
+  DateTime? get catalogueUpdatedAt => CatalogueSync.cachedAt(_prefs);
+
+  /// Use the cached remote catalogue immediately, then refresh from
+  /// Supabase in the background. Never throws and never clears the
+  /// current catalogue: a failed or empty fetch simply keeps it.
+  Future<void> _initCatalogue() async {
+    final cached = await CatalogueSync.loadCached(_prefs);
+    if (cached != null) {
+      setCatalogue(cached);
+      notifyListeners();
+    }
+    await refreshCatalogue();
+  }
+
+  /// Fetch the remote catalogue now (Settings "refresh" button).
+  /// Returns true when the app now shows fresh Supabase data, false
+  /// when it keeps the current catalogue (offline, not seeded yet, or
+  /// any other failure).
+  Future<bool> refreshCatalogue() async {
+    final data = await CatalogueSync.refresh(_prefs);
+    if (data == null) return false;
+    setCatalogue(data);
+    notifyListeners();
+    return true;
+  }
 
   Future<void> toggleFavorite(String bookId) async {
     if (_favorites.contains(bookId)) {

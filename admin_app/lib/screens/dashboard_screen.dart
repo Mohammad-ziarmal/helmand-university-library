@@ -39,6 +39,7 @@ class DashboardScreen extends StatelessWidget {
                     'readingBooks': 0,
                     'faculties': 0,
                     'departments': 0,
+                    'subjects': 0,
                     'downloads': 0,
                     'students': 0,
                   };
@@ -56,6 +57,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       _Stat(label: 'پوهنځي', value: stats['faculties']!),
                       _Stat(label: 'څانګې', value: stats['departments']!),
+                      _Stat(label: 'مضمونونه', value: stats['subjects']!),
                       _Stat(label: 'ډاونلوډونه', value: stats['downloads']!),
                       _Stat(label: 'محصلین', value: stats['students']!),
                     ],

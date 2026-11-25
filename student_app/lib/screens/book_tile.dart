@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../data/catalogue.dart';
+import '../models/book.dart';
 import '../l10n/strings.dart';
 import '../services/downloaded_books.dart';
 import '../services/store.dart';

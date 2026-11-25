@@ -276,6 +276,11 @@ class _BookFormScreenState extends State<BookFormScreen> {
           semesterNumber: _semesterNumber,
           downloadCount: existing?.downloadCount ?? 0,
           isArchived: _isArchived,
+          // Keep the stable app id / Pashto title / year on edit; the
+          // service only sends them when set (pre-migration safe).
+          appId: existing?.appId,
+          titlePs: existing?.titlePs,
+          year: existing?.year,
         );
         if (existing == null) {
           await SupabaseService.addBook(book);
@@ -305,6 +310,12 @@ class _BookFormScreenState extends State<BookFormScreen> {
           pdfUrl: _pdfUrl.text.trim(),
           hasPermission: _hasPermission,
           isArchived: _isArchived,
+          // Keep the stable app id / Pashto title / year on edit
+          // (reading-book edit is delete + add, so without these the
+          // new row would get a fresh generated app id).
+          appId: existing?.appId,
+          titlePs: existing?.titlePs,
+          year: existing?.year,
         );
         if (existing == null) {
           await SupabaseService.addReadingBook(book);

@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../data/catalogue.dart';
+import '../data/catalogue_helpers.dart';
 import '../l10n/strings.dart';
 import '../services/store.dart';
 import 'book_tile.dart';

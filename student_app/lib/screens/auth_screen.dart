@@ -18,7 +18,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-import '../data/catalogue.dart';
+import '../data/catalogue_helpers.dart';
 import '../l10n/strings.dart';
 import '../services/account.dart';
 import '../services/store.dart';

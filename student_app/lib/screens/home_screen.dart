@@ -9,7 +9,7 @@
 
 import 'package:flutter/material.dart';
 
-import '../data/catalogue.dart';
+import '../data/catalogue_helpers.dart';
 import '../l10n/strings.dart';
 import 'developer_screen.dart';
 import 'favorites_screen.dart';

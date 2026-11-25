@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../models/models.dart';
 import '../services/supabase_service.dart';
+import 'subjects_screen.dart';
 
 class ManageScreen extends StatefulWidget {
   const ManageScreen({super.key});
@@ -208,6 +209,7 @@ class _DepartmentManageScreenState extends State<DepartmentManageScreen> {
   Future<void> _addDepartment() async {
     final namePs = TextEditingController();
     final nameEn = TextEditingController();
+    final code = TextEditingController();
     final semesters = TextEditingController(text: '8');
     final ok = await showDialog<bool>(
       context: context,
@@ -223,6 +225,12 @@ class _DepartmentManageScreenState extends State<DepartmentManageScreen> {
             TextField(
               controller: nameEn,
               decoration: const InputDecoration(labelText: 'نوم (English)'),
+            ),
+            TextField(
+              controller: code,
+              decoration: const InputDecoration(
+                labelText: 'کوډ (انګلیسي، لکه bio — یوازې a-z، 0-9، -)',
+              ),
             ),
             TextField(
               controller: semesters,
@@ -246,12 +254,30 @@ class _DepartmentManageScreenState extends State<DepartmentManageScreen> {
       ),
     );
     if (ok == true && namePs.text.trim().isNotEmpty) {
+      // The code is the join key the student app uses (DESIGN §2):
+      // required, lowercase letters/digits/dashes only, never edited
+      // afterwards. The service validates it again and checks it is
+      // unique.
+      final deptCode = code.text.trim().toLowerCase();
+      if (!RegExp(r'^[a-z0-9-]+$').hasMatch(deptCode)) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'کوډ اړین دی او باید یوازې له a-z، 0-9 او - څخه جوړ وي (لکه bio).',
+              ),
+            ),
+          );
+        }
+        return;
+      }
       try {
         await SupabaseService.addDepartment(
           widget.faculty.id,
           namePs.text.trim(),
           nameEn.text.trim(),
           int.tryParse(semesters.text.trim()) ?? 8,
+          code: deptCode,
         );
         _reload();
       } catch (e) {
@@ -344,6 +370,20 @@ class _DepartmentManageScreenState extends State<DepartmentManageScreen> {
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
+                      IconButton(
+                        icon: const Icon(Icons.subject),
+                        tooltip: 'مضمونونه',
+                        onPressed: () async {
+                          await Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => SubjectsScreen(
+                                department: dept,
+                              ),
+                            ),
+                          );
+                          _reload();
+                        },
+                      ),
                       IconButton(
                         icon: const Icon(Icons.calendar_month),
                         tooltip: 'سمسترونه',

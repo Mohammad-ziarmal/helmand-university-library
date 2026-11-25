@@ -71,6 +71,39 @@ class SettingsScreen extends StatelessWidget {
           ),
           const SizedBox(height: 24),
           Text(
+            tr(context, 'catalogue'),
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            state.catalogueIsRemote
+                ? tr(context, 'catalogueRemote')
+                : tr(context, 'catalogueBundled'),
+          ),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            // Manual refresh (DESIGN §5.6). Offline or not seeded yet,
+            // the saved catalogue simply stays — nothing is wiped.
+            onPressed: () async {
+              final ok = await state.refreshCatalogue();
+              if (context.mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      tr(
+                        context,
+                        ok ? 'catalogueUpdated' : 'catalogueRefreshFailed',
+                      ),
+                    ),
+                  ),
+                );
+              }
+            },
+            icon: const Icon(Icons.refresh),
+            label: Text(tr(context, 'catalogueRefresh')),
+          ),
+          const SizedBox(height: 24),
+          Text(
             tr(context, 'account'),
             style: Theme.of(context).textTheme.titleMedium,
           ),

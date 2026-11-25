@@ -1,13 +1,45 @@
-// Small read-only helpers over the bundled catalogue.
-// The student app works fully offline from this data; Supabase is only
-// needed later for live updates from the Admin App.
+// Small read-only helpers over the CURRENT catalogue.
+//
+// The student app works fully offline from the bundled catalogue
+// (data/catalogue.dart). When the Admin App has published the catalogue
+// to Supabase, the sync (services/catalogue_sync.dart) swaps the
+// current catalogue for the remote one. Every screen reads through
+// the getters and functions below, so a sync updates the whole app
+// without touching the screens — and a failed or empty sync leaves
+// the bundled catalogue exactly as it was.
+//
+// The top-level getters keep the old names (faculties, departments,
+// libraryBooks, readingBooks) so existing screens keep working.
 
-import '../data/catalogue.dart';
-import '../data/subject_books.dart';
+import '../models/book.dart';
+import 'catalogue_data.dart';
 
-/// Only the book(s) that cover exactly this subject — matched by name
-/// against the book title (see subject_books.dart). A subject with no
-/// entry has no book yet; the app shows the 'upload soon' message.
+export '../models/book.dart';
+
+/// The catalogue every screen reads. Starts as the bundled catalogue;
+/// [setCatalogue] replaces it after a successful Supabase sync (or a
+/// cache load). Only [AppState] calls [setCatalogue], and it calls
+/// notifyListeners right after so the screens rebuild.
+CatalogueData _current = CatalogueData.bundled();
+
+CatalogueData get currentCatalogue => _current;
+
+void setCatalogue(CatalogueData data) {
+  _current = data;
+}
+
+List<Faculty> get faculties => _current.faculties;
+List<Department> get departments => _current.departments;
+List<LibraryBook> get libraryBooks => _current.libraryBooks;
+List<ReadingBook> get readingBooks => _current.readingBooks;
+Map<String, Map<int, List<Subject>>> get subjectsByDepartment =>
+    _current.subjectsByDepartment;
+Map<String, List<String>> get subjectBooks => _current.subjectBooks;
+
+/// Only the book(s) that cover exactly this subject — from the
+/// subject→books map (bundled subject_books.dart, or the remote
+/// book_subjects join table after a sync). A subject with no entry
+/// has no book yet; the app shows the 'upload soon' message.
 List<LibraryBook> booksOfSubject(
         String departmentId, int semester, String subjectName) {
   final ids =

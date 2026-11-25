@@ -26,6 +26,16 @@ class NotConfiguredError implements Exception {
   String toString() => 'Supabase is not connected yet.';
 }
 
+/// Thrown when the `subjects` table does not exist yet — the Phase 1
+/// migration has not been run in Supabase. The Subjects screen shows a
+/// "not set up yet" state for this instead of crashing.
+class SubjectsNotReadyError implements Exception {
+  const SubjectsNotReadyError();
+  @override
+  String toString() =>
+      'Subjects are not set up yet (run the Supabase migration first).';
+}
+
 class SupabaseService {
   static bool get isConfigured =>
       _supabaseUrl.isNotEmpty && _supabaseAnonKey.isNotEmpty;
@@ -115,17 +125,58 @@ class SupabaseService {
     String facultyId,
     String namePs,
     String nameEn,
-    int semesters,
-  ) async {
+    int semesters, {
+    required String code,
+  }) async {
     _requireConfigured();
+    // The code is the join key the student app uses (DESIGN §2), so it
+    // is required and must be lowercase letters, digits and dashes.
+    final clean = code.trim().toLowerCase();
+    if (!RegExp(r'^[a-z0-9-]+$').hasMatch(clean)) {
+      throw ArgumentError(
+        'Department code must use only a-z, 0-9 and - (e.g. bio).',
+      );
+    }
+    // Friendly duplicate check; the database unique index enforces it
+    // too. If the code column does not exist yet (migration not run),
+    // this check fails and is ignored — the insert below then reports
+    // the missing column.
+    try {
+      final existing = await client
+          .from('departments')
+          .select('id')
+          .eq('code', clean)
+          .limit(1);
+      if ((existing as List).isNotEmpty) {
+        throw ArgumentError(
+          'A department with code "$clean" already exists.',
+        );
+      }
+    } on ArgumentError {
+      rethrow;
+    } catch (_) {}
     final inserted = await client.from('departments').insert({
       'faculty_id': facultyId,
       'name_ps': namePs,
       'name_en': nameEn,
       'semesters': semesters,
+      'code': clean,
     }).select('id');
     await _audit('insert', 'departments',
         (inserted as List).first['id'] as String?);
+  }
+
+  /// Update a department's names / semester count. The `code` is NEVER
+  /// updated here: it is the join key the student app uses, so changing
+  /// it after subjects/books exist would orphan them (DESIGN §2).
+  static Future<void> updateDepartment(DepartmentRow dept) async {
+    _requireConfigured();
+    await client.from('departments').update({
+      'name_ps': dept.namePs,
+      'name_en': dept.nameEn,
+      'semesters': dept.semesters,
+    }).eq('id', dept.id);
+    await _audit('update', 'departments', dept.id);
   }
 
   static Future<void> deleteDepartment(String id) async {
@@ -168,6 +219,178 @@ class SupabaseService {
     await _audit('delete', 'semesters', id);
   }
 
+  // ------------------------------------------------------------ subjects
+  /// True when the error means the table does not exist yet (Postgres
+  /// 42P01: the Phase 1 migration has not been run).
+  static bool _isMissingTable(Object e) =>
+      e is PostgrestException &&
+      (e.code == '42P01' ||
+          e.message.contains('does not exist') ||
+          e.message.contains('Could not find the table'));
+
+  /// Subjects of one department, optionally one semester. Active
+  /// subjects first, then by semester and catalog order. Admins see
+  /// inactive (archived) rows too — the public student policy hides
+  /// them, the admin policy does not.
+  /// Throws [SubjectsNotReadyError] when the migration has not run.
+  static Future<List<SubjectRow>> fetchSubjects(
+    String departmentId, {
+    int? semester,
+  }) async {
+    _requireConfigured();
+    try {
+      var query = client
+          .from('subjects')
+          .select()
+          .eq('department_id', departmentId);
+      if (semester != null) {
+        query = query.eq('semester_number', semester);
+      }
+      final rows = await query
+          .order('is_active', ascending: false)
+          .order('semester_number', ascending: true)
+          .order('sort_order', ascending: true);
+      return (rows as List)
+          .map((e) => SubjectRow.fromMap(e as Map<String, dynamic>))
+          .toList();
+    } on PostgrestException catch (e) {
+      if (_isMissingTable(e)) throw const SubjectsNotReadyError();
+      rethrow;
+    }
+  }
+
+  static Future<void> addSubject(SubjectRow subject) async {
+    _requireConfigured();
+    try {
+      final inserted = await client
+          .from('subjects')
+          .insert(subject.toMap())
+          .select('id');
+      await _audit('insert', 'subjects',
+          (inserted as List).first['id'] as String?);
+    } on PostgrestException catch (e) {
+      if (_isMissingTable(e)) throw const SubjectsNotReadyError();
+      rethrow;
+    }
+  }
+
+  static Future<void> updateSubject(SubjectRow subject) async {
+    _requireConfigured();
+    await client
+        .from('subjects')
+        .update(subject.toMap())
+        .eq('id', subject.id);
+    await _audit('update', 'subjects', subject.id);
+  }
+
+  /// Archive, not hard delete (DESIGN §6): when books are linked to
+  /// this subject, the subject is only hidden (is_active = false) so
+  /// the books' subject pages keep working. Hard delete happens only
+  /// when nothing links to it. Returns true when the subject was
+  /// archived, false when it was deleted outright.
+  static Future<bool> deleteSubject(String id) async {
+    _requireConfigured();
+    final links = await client
+        .from('book_subjects')
+        .select('subject_id')
+        .eq('subject_id', id)
+        .limit(1);
+    if ((links as List).isNotEmpty) {
+      await client
+          .from('subjects')
+          .update({'is_active': false})
+          .eq('id', id);
+      await _audit('update', 'subjects', id);
+      return true;
+    }
+    await client.from('subjects').delete().eq('id', id);
+    await _audit('delete', 'subjects', id);
+    return false;
+  }
+
+  // -------------------------------------------------------- book links
+  /// Subject ids linked to one book (the authoritative subject links,
+  /// DESIGN §3.2 — never match books to subjects by name).
+  static Future<List<String>> fetchBookSubjects(String bookId) async {
+    _requireConfigured();
+    final rows = await client
+        .from('book_subjects')
+        .select('subject_id')
+        .eq('book_id', bookId);
+    return (rows as List)
+        .map((e) => (e as Map)['subject_id'] as String)
+        .toList();
+  }
+
+  static Future<void> linkBookToSubject(
+    String bookId,
+    String subjectId,
+  ) async {
+    _requireConfigured();
+    try {
+      await client.from('book_subjects').insert({
+        'book_id': bookId,
+        'subject_id': subjectId,
+      });
+    } on PostgrestException catch (e) {
+      // 23505 = already linked: treat as success.
+      if (e.code != '23505') rethrow;
+    }
+    await _audit('insert', 'book_subjects', subjectId);
+  }
+
+  static Future<void> unlinkBookFromSubject(
+    String bookId,
+    String subjectId,
+  ) async {
+    _requireConfigured();
+    await client
+        .from('book_subjects')
+        .delete()
+        .eq('book_id', bookId)
+        .eq('subject_id', subjectId);
+    await _audit('delete', 'book_subjects', subjectId);
+  }
+
+  /// A book's departments + semesters, as (departmentId, semester)
+  /// pairs. Semester 0 means "this department, no semester".
+  static Future<List<({String departmentId, int semesterNumber})>>
+      fetchBookPlacements(String bookId) async {
+    _requireConfigured();
+    final rows = await client
+        .from('book_placements')
+        .select('department_id, semester_number')
+        .eq('book_id', bookId);
+    return (rows as List).map((e) {
+      final m = e as Map<String, dynamic>;
+      return (
+        departmentId: (m['department_id'] as String?) ?? '',
+        semesterNumber: (m['semester_number'] as num?)?.toInt() ?? 0,
+      );
+    }).toList();
+  }
+
+  /// Replace a book's `book_placements` rows (delete + insert in one
+  /// admin action). An empty list clears all placements.
+  static Future<void> setBookPlacements(
+    String bookId,
+    List<({String departmentId, int semesterNumber})> placements,
+  ) async {
+    _requireConfigured();
+    await client.from('book_placements').delete().eq('book_id', bookId);
+    if (placements.isNotEmpty) {
+      await client.from('book_placements').insert([
+        for (final p in placements)
+          {
+            'book_id': bookId,
+            'department_id': p.departmentId,
+            'semester_number': p.semesterNumber,
+          },
+      ]);
+    }
+    await _audit('update', 'book_placements', bookId);
+  }
+
   // -------------------------------------------------------------- books
   static Future<List<BookRow>> fetchBooks() async {
     _requireConfigured();
@@ -182,9 +405,14 @@ class SupabaseService {
 
   static Future<void> addBook(BookRow book) async {
     _requireConfigured();
+    // New books need a stable app id (DESIGN §3.4) so the student app
+    // can map the row back to a bundled id. Generated when missing.
+    final toInsert = book.appId == null || book.appId!.isEmpty
+        ? book.copyWith(appId: 'b${DateTime.now().millisecondsSinceEpoch}')
+        : book;
     final inserted = await client
         .from('books')
-        .insert(book.toMap())
+        .insert(toInsert.toMap())
         .select('id');
     await _audit(
         'insert', 'books', (inserted as List).first['id'] as String?);
@@ -216,9 +444,12 @@ class SupabaseService {
 
   static Future<void> addReadingBook(ReadingBookRow book) async {
     _requireConfigured();
+    final toInsert = book.appId == null || book.appId!.isEmpty
+        ? book.copyWith(appId: 'r${DateTime.now().millisecondsSinceEpoch}')
+        : book;
     final inserted = await client
         .from('reading_books')
-        .insert(book.toMap())
+        .insert(toInsert.toMap())
         .select('id');
     await _audit('insert', 'reading_books',
         (inserted as List).first['id'] as String?);
@@ -296,6 +527,7 @@ class SupabaseService {
       'readingBooks': 0,
       'faculties': 0,
       'departments': 0,
+      'subjects': 0,
       'downloads': 0,
       'students': 0,
     };
@@ -319,6 +551,11 @@ class SupabaseService {
     try {
       final departments = await client.from('departments').select('id');
       stats['departments'] = (departments as List).length;
+    } catch (_) {}
+    try {
+      // 0 until the Phase 1 migration creates the subjects table.
+      final subjects = await client.from('subjects').select('id');
+      stats['subjects'] = (subjects as List).length;
     } catch (_) {}
     try {
       final students = await client.from('students').select('id');

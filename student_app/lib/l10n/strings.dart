@@ -75,7 +75,16 @@ class Strings {
     'totalDepartments': 'ټولې څانګې',
     'totalFaculties': 'ټول پوهنځي',
     'unknownAuthor': 'نامعلوم',
-    'version': 'نسخه 1.0.0+16',
+    'version': 'نسخه 1.0.0+19',
+    'catalogue': 'کټالوګ',
+    'catalogueRemote':
+        'تازه کټالوګ له سرور څخه ښودل کېږي.',
+    'catalogueBundled':
+        'په تلیفون کې خوندي شوی کټالوګ ښودل کېږي (آفلاین).',
+    'catalogueRefresh': 'کټالوګ تازه کول',
+    'catalogueUpdated': 'کټالوګ تازه شو.',
+    'catalogueRefreshFailed':
+        'تازه کول ونشول — انټرنیټ وګورئ؛ زوړ کټالوګ ښودل کېږي.',
     'noBooksNote':
         'د دې څانګې کتابونه لا په eCampus کې نشته؛ کتابونه به له پوهنتون څخه راوړل شي.',
     'pcbNote':
@@ -182,7 +191,15 @@ class Strings {
     'totalDepartments': 'Total departments',
     'totalFaculties': 'Total faculties',
     'unknownAuthor': 'Unknown',
-    'version': 'Version 1.0.0+18',
+    'version': 'Version 1.0.0+19',
+    'catalogue': 'Catalogue',
+    'catalogueRemote': 'Showing the latest catalogue from the server.',
+    'catalogueBundled':
+        'Showing the catalogue saved on the phone (offline).',
+    'catalogueRefresh': 'Refresh catalogue',
+    'catalogueUpdated': 'Catalogue updated.',
+    'catalogueRefreshFailed':
+        'Could not refresh — check the internet; showing the saved catalogue.',
     'noBooksNote':
         'No books for this department on eCampus yet; books will come from the university.',
     'pcbNote':
