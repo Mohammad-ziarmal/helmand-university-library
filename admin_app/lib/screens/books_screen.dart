@@ -189,6 +189,16 @@ class _BookFormScreenState extends State<BookFormScreen> {
   int? _semesterNumber;
   List<DepartmentRow> _departments = [];
 
+  // Book <-> subject links (DESIGN §3.2). The service layer already
+  // has link/unlink/fetch; this screen only drives them.
+  List<String> _linkedIds = [];
+  List<SubjectRow> _linkedSubjects = [];
+  List<SubjectRow> _availableSubjects = [];
+  String? _selectedSubjectToAdd;
+  bool _linksLoading = false;
+  bool _linksBusy = false;
+  String? _linksError;
+
   @override
   void initState() {
     super.initState();
@@ -221,6 +231,111 @@ class _BookFormScreenState extends State<BookFormScreen> {
         }
         if (mounted) setState(() => _departments = all);
       }).catchError((_) {});
+      // Linked subjects + subjects available for linking.
+      _loadLinks();
+      _loadAvailableSubjects();
+    }
+  }
+
+  /// The subjects this book is linked to (book_subjects) with their
+  /// names resolved via fetchSubjects of the book's department.
+  Future<void> _loadLinks() async {
+    final existing = widget.existing;
+    if (widget.kind != BookKind.university || existing is! BookRow) return;
+    setState(() {
+      _linksLoading = true;
+      _linksError = null;
+    });
+    try {
+      final ids = await SupabaseService.fetchBookSubjects(existing.id);
+      var named = <SubjectRow>[];
+      if (_departmentId != null) {
+        final all = await SupabaseService.fetchSubjects(_departmentId!);
+        final byId = {for (final s in all) s.id: s};
+        named = [
+          for (final id in ids)
+            if (byId[id] != null) byId[id]!
+        ];
+      }
+      if (mounted) {
+        setState(() {
+          _linkedIds = ids;
+          _linkedSubjects = named;
+          _linksLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _linksLoading = false;
+          _linksError = 'تړنې ونه شوې ښودلای — انټرنېټ وګورئ';
+        });
+      }
+    }
+  }
+
+  /// Subjects of the currently selected department + semester, for
+  /// the "add link" dropdown.
+  Future<void> _loadAvailableSubjects() async {
+    if (widget.kind != BookKind.university) return;
+    final dept = _departmentId;
+    final sem = _semesterNumber;
+    if (dept == null || sem == null) {
+      if (mounted) {
+        setState(() {
+          _availableSubjects = [];
+          _selectedSubjectToAdd = null;
+        });
+      }
+      return;
+    }
+    try {
+      final list = await SupabaseService.fetchSubjects(dept, semester: sem);
+      if (mounted) {
+        setState(() {
+          _availableSubjects = list;
+          _selectedSubjectToAdd = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _availableSubjects = [];
+          _linksError = 'مضمونونه ونه شوې ښودلای — انټرنېټ وګورئ';
+        });
+      }
+    }
+  }
+
+  Future<void> _addLink() async {
+    final bookId = (widget.existing as BookRow?)?.id;
+    final subjectId = _selectedSubjectToAdd;
+    if (bookId == null || bookId.isEmpty || subjectId == null) return;
+    setState(() => _linksBusy = true);
+    try {
+      await SupabaseService.linkBookToSubject(bookId, subjectId);
+      await _loadLinks();
+      await _loadAvailableSubjects();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _linksError = 'تړنه ونه شوه — انټرنېټ وګورئ');
+      }
+    } finally {
+      if (mounted) setState(() => _linksBusy = false);
+    }
+  }
+
+  Future<void> _removeLink(String subjectId) async {
+    final bookId = (widget.existing as BookRow?)?.id;
+    if (bookId == null || bookId.isEmpty) return;
+    try {
+      await SupabaseService.unlinkBookFromSubject(bookId, subjectId);
+      await _loadLinks();
+      await _loadAvailableSubjects();
+    } catch (e) {
+      if (mounted) {
+        setState(() => _linksError = 'تړنه ونه شوه ړنګه — انټرنېټ وګورئ');
+      }
     }
   }
 
@@ -338,6 +453,120 @@ class _BookFormScreenState extends State<BookFormScreen> {
     }
   }
 
+  /// "مضمونونه" section: the book's linked subjects with a remove
+  /// button each, plus a dropdown to link a new subject. Links need
+  /// the saved book id, so a new (unsaved) book only gets a hint.
+  Widget _buildLinksSection() {
+    final isNew = widget.existing == null;
+    final unlinked = _availableSubjects
+        .where((s) => !_linkedIds.contains(s.id))
+        .toList();
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            const Text(
+              'مضمونونه',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            if (isNew)
+              const Text(
+                'لومړی کتاب خوندي کړئ، بیا مضمونونه ورسره وتړئ',
+              )
+            else ...[
+              if (_linksLoading)
+                const Center(child: CircularProgressIndicator())
+              else if (_linkedSubjects.isEmpty && _linkedIds.isEmpty)
+                const Text('تر اوسه هېڅ مضمون سره نه دی تړلی.')
+              else ...[
+                ..._linkedSubjects.map(
+                  (s) => Row(
+                    children: [
+                      Expanded(
+                        child: Text('${s.name} — سمستر ${s.semesterNumber}'),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        tooltip: 'ړنګول',
+                        onPressed: () => _removeLink(s.id),
+                      ),
+                    ],
+                  ),
+                ),
+                // Linked ids whose names could not be resolved
+                // (e.g. the book has no department set yet).
+                ..._linkedIds
+                    .where(
+                      (id) => !_linkedSubjects.any((s) => s.id == id),
+                    )
+                    .map(
+                      (id) => Row(
+                        children: [
+                          const Expanded(child: Text('مضمون')),
+                          IconButton(
+                            icon: const Icon(Icons.close),
+                            tooltip: 'ړنګول',
+                            onPressed: () => _removeLink(id),
+                          ),
+                        ],
+                      ),
+                    ),
+              ],
+              const SizedBox(height: 8),
+              if (_departmentId == null)
+                const Text('لومړی څانګه وټاکئ')
+              else if (_semesterNumber == null)
+                const Text('لومړی سمستر وټاکئ')
+              else if (unlinked.isEmpty)
+                const Text('په دې سمستر کې هېڅ مضمون نشته')
+              else
+                Row(
+                  children: [
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        value: _selectedSubjectToAdd,
+                        decoration: const InputDecoration(
+                          labelText: 'مضمون',
+                          border: OutlineInputBorder(),
+                        ),
+                        items: unlinked
+                            .map(
+                              (s) => DropdownMenuItem(
+                                value: s.id,
+                                child: Text(s.name),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (v) =>
+                            setState(() => _selectedSubjectToAdd = v),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: (_selectedSubjectToAdd == null || _linksBusy)
+                          ? null
+                          : _addLink,
+                      child: const Text('مضمون اضافه کړه'),
+                    ),
+                  ],
+                ),
+              if (_linksError != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _linksError!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ],
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isUniversity = widget.kind == BookKind.university;
@@ -402,7 +631,11 @@ class _BookFormScreenState extends State<BookFormScreen> {
                     ),
                   )
                   .toList(),
-              onChanged: (v) => setState(() => _departmentId = v),
+              onChanged: (v) {
+                setState(() => _departmentId = v);
+                _loadLinks();
+                _loadAvailableSubjects();
+              },
             ),
           if (isUniversity && _departments.isNotEmpty)
             const SizedBox(height: 12),
@@ -420,8 +653,13 @@ class _BookFormScreenState extends State<BookFormScreen> {
                   child: Text('سمستر ${i + 1}'),
                 ),
               ),
-              onChanged: (v) => setState(() => _semesterNumber = v),
+              onChanged: (v) {
+                setState(() => _semesterNumber = v);
+                _loadAvailableSubjects();
+              },
             ),
+          if (isUniversity) const SizedBox(height: 12),
+          if (isUniversity) _buildLinksSection(),
           if (isUniversity) const SizedBox(height: 12),
           TextField(
             controller: _pdfUrl,
