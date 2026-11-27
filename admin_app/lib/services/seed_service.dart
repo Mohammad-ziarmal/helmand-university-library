@@ -413,10 +413,20 @@ class SeedService {
     );
 
     // ------------------------------------------- 9. verify by counting
+    // NOTE (2026-11-27): book_subjects / book_placements have NO `id`
+    // column — their key is the composite (book_id, subject_id) /
+    // (book_id, department_id, semester_number). Counting every table
+    // by `id` made this step throw SeedNotReadyError AFTER a fully
+    // successful upload (all 1,230 + 227 + 670 + 616 + 22 rows were in
+    // the database), so count the two link tables by `book_id`.
     onProgress('تایید کېږي…', 0, 1);
     final actual = <String, int>{};
     for (final t in _expectedTables) {
-      actual[t] = (await _selectAll(t, 'id')).length;
+      final countColumn =
+          (t == 'book_subjects' || t == 'book_placements')
+              ? 'book_id'
+              : 'id';
+      actual[t] = (await _selectAll(t, countColumn)).length;
     }
 
     // One audit entry for the whole seed (never breaks the result).
